@@ -114,6 +114,27 @@ def show_categories(prompts):
     print(f"\n총 {len(filtered)}개의 프롬프트")
 
 
+def search_prompt(prompts):
+    print("\n=== 프롬프트 검색 ===")
+    keyword = get_non_empty_input("검색어: ").lower()
+    results = []
+
+    for prompt in prompts:
+        title = prompt["title"].lower()
+        content = prompt["content"].lower()
+        if keyword in title or keyword in content:
+            results.append(prompt)
+
+    if not results:
+        print("검색 결과가 없습니다.")
+        return
+
+    print("\n검색 결과:")
+    for index, prompt in enumerate(results, start=1):
+        print_prompt_summary(index, prompt)
+    print(f"\n{len(results)}개의 프롬프트를 찾았습니다.")
+
+
 def show_menu():
     print("\n=== 나만의 프롬프트 관리 ===")
     print("1. 프롬프트 추가")
@@ -139,6 +160,8 @@ def run():
             show_list(prompts)
         elif choice == "3":
             show_categories(prompts)
+        elif choice == "4":
+            search_prompt(prompts)
         elif choice == "0":
             print("프로그램을 종료합니다.")
             break
