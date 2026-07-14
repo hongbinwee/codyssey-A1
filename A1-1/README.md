@@ -83,8 +83,7 @@ PYTHONPYCACHEPREFIX=/tmp/codyssey-a1-pycache python3 -m py_compile main_a1_1.py
 - 개발 환경 설정 화면 캡처
 - `git log --oneline --graph` 캡처
 
-## 현재 남은 핵심 작업
-- README를 제출용 설명 문서로 계속 보강
-- Git 커밋을 기능 단위로 10개 이상 구성
-- 브랜치 생성 및 병합 기록 1회 이상 남기기
-- GitHub 최종 제출 상태 점검
+## Git 작업 상태
+- `main_a1_1.py` 기준으로 기능 단위 커밋을 쌓았습니다.
+- `feature/a1-1-list-view` 브랜치에서 목록 기능을 구현한 뒤 `main`으로 병합했습니다.
+- 최종 제출 전 `git log --oneline --graph` 화면을 캡처하면 커밋 흐름과 브랜치 병합 기록을 함께 확인할 수 있습니다.
