@@ -6,7 +6,7 @@
 
 이 미션의 실제 산출물은 `A1-1/` 폴더 안에서 관리합니다.
 
-- 실행 파일: `main.py`
+- 실행 파일: `main_a1_1.py`
 - 미션 요약: `mission_summary.md`
 - 제출 체크리스트: `submission_checklist.md`
 - Git 작업 가이드: `git_workflow_guide.md`
@@ -20,14 +20,14 @@
 
 ```bash
 cd A1-1
-python3 main.py
+python3 main_a1_1.py
 ```
 
 문법 검증은 아래처럼 할 수 있습니다.
 
 ```bash
 cd A1-1
-PYTHONPYCACHEPREFIX=/tmp/codyssey-a1-pycache python3 -m py_compile main.py
+PYTHONPYCACHEPREFIX=/tmp/codyssey-a1-pycache python3 -m py_compile main_a1_1.py
 ```
 
 ## 주요 기능

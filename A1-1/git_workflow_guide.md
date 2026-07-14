@@ -18,7 +18,7 @@ git config user.email "project99hong@gmail.com"
 
 ## 2. 다음 커밋 추천 순서
 ```bash
-git add A1-1/main.py
+git add A1-1/main_a1_1.py
 git commit -m "feat: improve prompt manager flow"
 ```
 
@@ -39,7 +39,7 @@ git commit -m "feat: improve prompt manager flow"
 
 ```bash
 git checkout -b feature/prompt-list
-git add A1-1/main.py
+git add A1-1/main_a1_1.py
 git commit -m "feat: implement prompt list view"
 git checkout main
 git merge feature/prompt-list

@@ -22,7 +22,7 @@
 - `git_workflow_guide.md`
 - `handoff.md`
 - `spec.md`
-- `main.py`
+- `main_a1_1.py`
 
 ## 3. 이미 완료된 작업
 
@@ -32,14 +32,14 @@
 - 제출 체크리스트 작성 완료
 - Git 작업 가이드 작성 완료
 - 제출물 완성 Spec 작성 완료
-- `main.py`를 `A1-1/` 안으로 이동 완료
+- 실행 파일명을 `main_a1_1.py`로 확정 완료
 - 로컬 Git 저장소 `main` 브랜치로 초기화 완료
 - 프로그램 실행 검증 완료
-- `PYTHONPYCACHEPREFIX=/tmp/codyssey-a1-pycache python3 -m py_compile main.py` 검증 완료
+- `PYTHONPYCACHEPREFIX=/tmp/codyssey-a1-pycache python3 -m py_compile main_a1_1.py` 검증 완료
 
 ## 4. 현재 프로그램 구현 상태
 
-`A1-1/main.py`에 아래 기능이 구현되어 있음.
+`A1-1/main_a1_1.py`에 아래 기능이 구현되어 있음.
 
 - 프롬프트 추가
 - 전체 목록 보기
@@ -86,14 +86,14 @@
 
 ```bash
 cd A1-1
-python3 main.py
+python3 main_a1_1.py
 ```
 
 문법 검증:
 
 ```bash
 cd A1-1
-PYTHONPYCACHEPREFIX=/tmp/codyssey-a1-pycache python3 -m py_compile main.py
+PYTHONPYCACHEPREFIX=/tmp/codyssey-a1-pycache python3 -m py_compile main_a1_1.py
 ```
 
 Git 상태 확인:
