@@ -5,6 +5,7 @@
 - 기본 브랜치: `main`
 - 첫 커밋 완료
 - 원격 `origin/main` 연결 완료
+- `feature/a1-1-list-view` 브랜치 생성 및 `main` 병합 완료
 - `user.name = codex_hongbin`
 - `user.email = project99hong@gmail.com`
 
@@ -33,6 +34,8 @@ git commit -m "feat: improve prompt manager flow"
 8. `feat: add prompt detail view`
 9. `feat: implement favorites toggle and list`
 10. `docs: write readme and submission checklist`
+
+현재 구현 이력에는 `main_a1_1.py` 기준으로 메뉴, 기본 데이터, 프롬프트 추가, 목록, 카테고리 조회, 검색, 상세 보기, 즐겨찾기 관리 기능이 기능 단위 커밋으로 쌓여 있습니다.
 
 ## 4. 브랜치 생성 및 병합 예시
 목록 기능을 별도 브랜치에서 작업한 기록을 남기고 싶다면:

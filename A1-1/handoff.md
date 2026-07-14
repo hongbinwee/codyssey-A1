@@ -36,6 +36,8 @@
 - 로컬 Git 저장소 `main` 브랜치로 초기화 완료
 - 프로그램 실행 검증 완료
 - `PYTHONPYCACHEPREFIX=/tmp/codyssey-a1-pycache python3 -m py_compile main_a1_1.py` 검증 완료
+- `feature/a1-1-list-view` 브랜치 생성 및 `main` 병합 완료
+- `main_a1_1.py` 기능 단위 구현 커밋 진행 완료
 
 ## 4. 현재 프로그램 구현 상태
 
@@ -59,8 +61,8 @@
 
 1. `A1-1/README.md`를 현재 폴더 구조 기준으로 보강
 2. 프로그램 UX와 예외 처리 보강
-3. 기능 단위 커밋 10개 이상 구성
-4. 브랜치 생성 및 병합 기록 만들기
+3. 의미 있는 커밋 10개 이상 최종 확인
+4. GitHub push 및 원격 구조 확인
 5. 제출용 스크린샷 준비
 6. 최종 제출 점검
 
