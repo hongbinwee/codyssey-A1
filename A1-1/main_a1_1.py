@@ -31,6 +31,48 @@ def create_default_prompts():
     ]
 
 
+def get_non_empty_input(message):
+    while True:
+        value = input(message).strip()
+        if value:
+            return value
+        print("입력값이 비어 있습니다. 다시 입력해주세요.")
+
+
+def choose_category():
+    print("\n카테고리 선택:")
+    for index, category in enumerate(PROMPT_CATEGORIES, start=1):
+        print(f"{index}. {category}")
+    print("0. 직접 입력")
+
+    while True:
+        choice = input("선택: ").strip()
+        if choice == "0":
+            return get_non_empty_input("직접 입력할 카테고리: ")
+        if choice.isdigit():
+            number = int(choice)
+            if 1 <= number <= len(PROMPT_CATEGORIES):
+                return PROMPT_CATEGORIES[number - 1]
+        print("올바른 카테고리 번호를 입력해주세요.")
+
+
+def add_prompt(prompts):
+    print("\n=== 프롬프트 추가 ===")
+    title = get_non_empty_input("제목: ")
+    content = get_non_empty_input("내용: ")
+    category = choose_category()
+
+    prompts.append(
+        {
+            "title": title,
+            "content": content,
+            "category": category,
+            "favorite": False,
+        }
+    )
+    print("프롬프트가 추가되었습니다!")
+
+
 def show_menu():
     print("\n=== 나만의 프롬프트 관리 ===")
     print("1. 프롬프트 추가")
@@ -50,12 +92,14 @@ def run():
         show_menu()
         choice = input("선택: ").strip()
 
-        if choice == "0":
+        if choice == "1":
+            add_prompt(prompts)
+        elif choice == "0":
             print("프로그램을 종료합니다.")
             break
-
-        print(f"현재 {len(prompts)}개의 기본 프롬프트가 준비되어 있습니다.")
-        print("선택한 기능은 아직 구현 중입니다.")
+        else:
+            print(f"현재 {len(prompts)}개의 프롬프트가 준비되어 있습니다.")
+            print("선택한 기능은 아직 구현 중입니다.")
 
 
 if __name__ == "__main__":
