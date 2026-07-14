@@ -12,7 +12,6 @@
 ### 루트
 
 - `AGENTS.md`
-- `main.py`
 - `.gitignore`
 
 ### A1-1 폴더
@@ -22,6 +21,8 @@
 - `submission_checklist.md`
 - `git_workflow_guide.md`
 - `handoff.md`
+- `spec.md`
+- `main.py`
 
 ## 3. 이미 완료된 작업
 
@@ -30,13 +31,15 @@
 - README 초안 작성 완료
 - 제출 체크리스트 작성 완료
 - Git 작업 가이드 작성 완료
+- 제출물 완성 Spec 작성 완료
+- `main.py`를 `A1-1/` 안으로 이동 완료
 - 로컬 Git 저장소 `main` 브랜치로 초기화 완료
 - 프로그램 실행 검증 완료
-- `python3 -m py_compile main.py` 검증 완료
+- `PYTHONPYCACHEPREFIX=/tmp/codyssey-a1-pycache python3 -m py_compile main.py` 검증 완료
 
 ## 4. 현재 프로그램 구현 상태
 
-`main.py`에 아래 기능이 구현되어 있음.
+`A1-1/main.py`에 아래 기능이 구현되어 있음.
 
 - 프롬프트 추가
 - 전체 목록 보기
@@ -55,42 +58,42 @@
 우선순위 순서:
 
 1. `A1-1/README.md`를 현재 폴더 구조 기준으로 보강
-2. 필요하면 `main.py`를 `A1-1/` 안으로 옮길지 여부 결정
-3. Git 사용자 정보 설정
-4. 기능 단위 커밋 10개 이상 구성
-5. 브랜치 생성 및 병합 기록 만들기
-6. GitHub 원격 저장소 연결 및 push
-7. 제출용 스크린샷 준비
+2. 프로그램 UX와 예외 처리 보강
+3. 기능 단위 커밋 10개 이상 구성
+4. 브랜치 생성 및 병합 기록 만들기
+5. 제출용 스크린샷 준비
+6. 최종 제출 점검
 
 ## 6. 다음 에이전트가 먼저 확인할 것
 
-- 지금 구조에서 `main.py`는 루트에 있고 문서는 `A1-1/`에 있음
-- 이 구조를 유지할지, `A1-1/` 내부로 코드까지 모을지 먼저 결정 필요
+- 현재 실행 파일과 문서가 모두 `A1-1/` 안에 모여 있음
+- 루트는 작업공간 안내와 Git 루트 역할로 유지하면 됨
 - 사용자는 미션별 폴더 정리를 중요하게 생각함
 - 여러 파일을 동시에 바꾸는 작업이면 먼저 Spec 또는 간단한 계획을 세우는 것이 루트 규칙에 맞음
 
 ## 7. 권장 다음 작업 순서
 
-1. 현재 구조 확정
-2. `A1-1` 기준 README 경로/설명 정리
-3. Git 설정 확인
-4. 커밋 분할 전략 수립
-5. 브랜치 작업 1회 수행
-6. GitHub 연결
-7. 제출 캡처 정리
+1. `A1-1` 기준 README/체크리스트 보강
+2. 프로그램 UX 보완
+3. 커밋 분할 전략 수립
+4. 브랜치 작업 1회 수행
+5. 제출 캡처 정리
+6. 최종 검증
 
 ## 8. 실행 및 검증 방법
 
 프로그램 실행:
 
 ```bash
+cd A1-1
 python3 main.py
 ```
 
 문법 검증:
 
 ```bash
-python3 -m py_compile main.py
+cd A1-1
+PYTHONPYCACHEPREFIX=/tmp/codyssey-a1-pycache python3 -m py_compile main.py
 ```
 
 Git 상태 확인:
@@ -102,9 +105,10 @@ git status --short --branch
 ## 9. 확인된 현재 상태
 
 - Git 저장소는 생성되어 있음
-- 아직 커밋은 없음
-- `user.name`, `user.email`은 현재 비어 있었음
-- 원격 저장소는 아직 연결하지 않음
+- GitHub `origin/main`과 연결되어 있음
+- 현재 `main`은 원격 추적 상태임
+- `user.name = codex_hongbin`
+- `user.email = project99hong@gmail.com`
 
 ## 10. 작업 시 주의사항
 

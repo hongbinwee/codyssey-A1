@@ -3,26 +3,27 @@
 현재 상태:
 - 로컬 Git 저장소 초기화 완료
 - 기본 브랜치: `main`
-- 아직 커밋 없음
-- `user.name`, `user.email` 설정 필요
-- 원격 GitHub 저장소 연결 필요
+- 첫 커밋 완료
+- 원격 `origin/main` 연결 완료
+- `user.name = codex_hongbin`
+- `user.email = project99hong@gmail.com`
 
 ## 1. 사용자 정보 설정
-아래 명령어의 값을 본인 정보로 바꿔서 실행하세요.
+현재 저장소에는 이미 아래 정보가 설정되어 있습니다.
 
 ```bash
-git config --global user.name "본인 이름"
-git config --global user.email "본인 이메일"
+git config user.name "codex_hongbin"
+git config user.email "project99hong@gmail.com"
 ```
 
-## 2. 첫 커밋 전 추천 순서
+## 2. 다음 커밋 추천 순서
 ```bash
-git add .
-git commit -m "chore: initialize prompt manager project"
+git add A1-1/main.py
+git commit -m "feat: improve prompt manager flow"
 ```
 
 ## 3. 10개 커밋 예시
-1. `chore: initialize prompt manager project`
+1. `chore: initialize codyssey a1 workspace`
 2. `feat: add default prompt data`
 3. `feat: implement main menu`
 4. `feat: add prompt creation flow`
@@ -38,19 +39,22 @@ git commit -m "chore: initialize prompt manager project"
 
 ```bash
 git checkout -b feature/prompt-list
-git add main.py
+git add A1-1/main.py
 git commit -m "feat: implement prompt list view"
 git checkout main
 git merge feature/prompt-list
 ```
 
 ## 5. GitHub 연결 예시
-GitHub에서 새 저장소를 만든 뒤 아래처럼 연결합니다.
+현재 저장소는 이미 아래 원격과 연결되어 있습니다.
 
 ```bash
-git remote add origin <GitHub 저장소 URL>
-git push -u origin main
+git remote -v
 ```
+
+연결된 원격:
+
+- `origin https://github.com/hongbinwee/codyssey-A1.git`
 
 ## 6. 제출용 캡처 추천 순서
 1. VSCode 화면과 Python 버전
