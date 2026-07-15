@@ -39,6 +39,22 @@ def get_non_empty_input(message):
         print("입력값이 비어 있습니다. 다시 입력해주세요.")
 
 
+def is_duplicate_title(prompts, title):
+    normalized_title = title.lower()
+    for prompt in prompts:
+        if prompt["title"].lower() == normalized_title:
+            return True
+    return False
+
+
+def get_unique_title(prompts):
+    while True:
+        title = get_non_empty_input("제목: ")
+        if not is_duplicate_title(prompts, title):
+            return title
+        print("이미 등록된 제목입니다. 다른 제목을 입력해주세요.")
+
+
 def choose_category():
     print("\n카테고리 선택:")
     for index, category in enumerate(PROMPT_CATEGORIES, start=1):
@@ -58,7 +74,7 @@ def choose_category():
 
 def add_prompt(prompts):
     print("\n=== 프롬프트 추가 ===")
-    title = get_non_empty_input("제목: ")
+    title = get_unique_title(prompts)
     content = get_non_empty_input("내용: ")
     category = choose_category()
 
@@ -231,8 +247,7 @@ def run():
             print("프로그램을 종료합니다.")
             break
         else:
-            print(f"현재 {len(prompts)}개의 프롬프트가 준비되어 있습니다.")
-            print("선택한 기능은 아직 구현 중입니다.")
+            print("올바른 번호를 입력해주세요.")
 
 
 if __name__ == "__main__":

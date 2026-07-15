@@ -55,6 +55,7 @@ PYTHONPYCACHEPREFIX=/tmp/codyssey-a1-pycache python3 -m py_compile main_a1_1.py
 - 기능별 함수 분리
 - 목록, 카테고리 조회, 검색, 상세 보기, 즐겨찾기 기능 포함
 - 잘못된 입력 안내 처리 포함
+- 중복된 프롬프트 제목 등록 방지
 - 데이터는 프로그램 실행 중에만 유지
 
 ## 사용한 코드 구조
