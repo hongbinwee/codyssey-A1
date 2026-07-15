@@ -34,7 +34,7 @@
 - [ ] 메뉴 실행 화면 스크린샷
 - [ ] 프롬프트 추가 화면 스크린샷
 - [ ] 목록 / 검색 / 즐겨찾기 화면 스크린샷
-- [ ] 최종 `git log --oneline --graph` 스크린샷
+- [x] 최종 `git log --oneline --graph` 스크린샷
 
 ## 현재 스크린샷 파일
 - [x] `스크린샷/01-python-version-hello.png`
@@ -43,6 +43,7 @@
 - [x] `스크린샷/04-git-push-origin-main.png`
 - [x] `스크린샷/05-gitignore-readme-push.png`
 - [x] `스크린샷/06-github-repository-initial.png`
+- [x] `스크린샷/07-final-git-log-graph.png`
 
 ## 제출 직전 최종 확인
 - [x] README 설명과 실제 파일 경로가 일치한다.

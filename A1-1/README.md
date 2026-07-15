@@ -93,8 +93,9 @@ PYTHONPYCACHEPREFIX=/tmp/codyssey-a1-pycache python3 -m py_compile main_a1_1.py
 - `04-git-push-origin-main.png`: 원격 저장소 push 및 upstream 설정 화면
 - `05-gitignore-readme-push.png`: `.gitignore`, README 작성 및 push 작업 화면
 - `06-github-repository-initial.png`: GitHub 저장소 화면
+- `07-final-git-log-graph.png`: 최종 `git log --oneline --graph --decorate` 화면
 
-프로그램 메뉴, 프롬프트 추가, 목록, 검색, 즐겨찾기 실행 결과 화면은 추가 캡처가 필요합니다. 최종 제출용 Git 로그는 현재 커밋 상태 기준으로 `git log --oneline --graph --decorate`를 다시 캡처하는 것을 권장합니다.
+프로그램 메뉴, 프롬프트 추가, 목록, 검색, 즐겨찾기 실행 결과 화면은 추가 캡처가 필요합니다.
 
 ## Git 작업 상태
 - `main_a1_1.py` 기준으로 기능 단위 커밋을 쌓았습니다.
