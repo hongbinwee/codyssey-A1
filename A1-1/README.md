@@ -65,6 +65,8 @@ PYTHONPYCACHEPREFIX=/tmp/codyssey-a1-pycache python3 -m py_compile main_a1_1.py
 | Git 커밋 10개 이상 | 기능 단위 커밋 10개 이상 생성 |
 | 브랜치 생성 및 병합 | `feature/a1-1-list-view` 브랜치 생성 후 `main`에 병합 |
 | GitHub 업로드 | `origin/main`에 push 완료 |
+| Git 환경 확인 | Git 버전과 사용자 정보(`user.name`, `user.email`) 설정 확인 |
+| 샘플 저장소 clone | 공개 샘플 저장소 clone 후 폴더 구조와 로그 확인 |
 
 ## 코드 구조
 
@@ -83,6 +85,27 @@ PYTHONPYCACHEPREFIX=/tmp/codyssey-a1-pycache python3 -m py_compile main_a1_1.py
 - `main_a1_1.py` 기준으로 기능 단위 커밋을 쌓았습니다.
 - `feature/a1-1-list-view` 브랜치에서 목록 기능을 구현한 뒤 `main`으로 병합했습니다.
 - 최종 Git 로그는 `스크린샷/07-final-git-log-graph.png`에서 확인할 수 있습니다.
+- `git --version`, `git config user.name`, `git config user.email` 명령으로 Git 버전과 사용자 정보를 확인했습니다.
+
+샘플 저장소 clone 확인:
+
+```text
+cd Desktop
+git clone https://github.com/octocat/Hello-World.git
+cd Hello-World
+git log --oneline
+
+Cloning into 'Hello-World'...
+remote: Enumerating objects: 13, done.
+remote: Total 13 (delta 0), reused 0 (delta 0), pack-reused 13
+Receiving objects: 100% (13/13), done.
+
+7fd1a60 Merge pull request #6 from Spaceghost/patch-1
+762941b Update README
+553c207 first commit
+```
+
+`git clone`으로 원격 저장소를 내려받고, `git log --oneline`으로 커밋 기록을 확인하는 과정을 실습했습니다. 샘플 저장소는 확인 후 삭제했습니다.
 
 ## Git 커밋 및 브랜치 기록
 
@@ -90,7 +113,7 @@ PYTHONPYCACHEPREFIX=/tmp/codyssey-a1-pycache python3 -m py_compile main_a1_1.py
 | --- | --- |
 | 기본 브랜치 | `main` |
 | 원격 저장소 | `origin https://github.com/hongbinwee/codyssey-A1.git` |
-| 전체 커밋 수 | 23개 |
+| 전체 커밋 수 | 24개 이상 |
 | 기능 작업 브랜치 | `feature/a1-1-list-view` |
 | 병합 커밋 | `1bae160 merge: add prompt list feature` |
 | 최종 push 상태 | `main`과 `origin/main` 동기화 완료 |
@@ -173,3 +196,17 @@ main
 - 개발 환경 설정 스크린샷 포함 완료
 - 최종 Git 로그 스크린샷 포함 완료
 - GitHub 저장소 URL과 실행 방법 기재 완료
+
+## 인터뷰 대비 정리
+
+### 데이터 영속화
+
+현재 프로그램은 프롬프트를 리스트에 저장하므로 프로그램을 종료하면 실행 중 추가한 데이터가 사라집니다. 종료 후에도 데이터를 유지하려면 JSON 파일에 프롬프트 리스트를 저장하고, 프로그램 시작 시 JSON 파일을 다시 읽어오는 구조로 확장할 수 있습니다. JSON은 현재 사용 중인 리스트와 딕셔너리 구조를 그대로 표현하기 쉬워 이 프로그램에 적합합니다.
+
+### 병합 충돌 해결 순서
+
+브랜치 병합 중 충돌이 발생하면 먼저 충돌이 난 파일을 열어 어떤 코드가 겹쳤는지 확인합니다. 그다음 필요한 코드만 남기고 충돌 표시를 제거한 뒤 프로그램을 실행해 기능이 정상 동작하는지 검증합니다. 문제가 없으면 수정한 파일을 `git add` 하고 충돌 해결 커밋을 남깁니다.
+
+### 카테고리 변경 대응
+
+카테고리 목록은 `main_a1_1.py`의 `PROMPT_CATEGORIES`에 모아두었습니다. 카테고리를 추가하거나 수정할 때는 이 리스트를 먼저 수정하는 것이 가장 안전합니다. 프롬프트 추가와 카테고리별 조회가 같은 목록을 사용하므로 카테고리 기준을 한 곳에서 관리할 수 있습니다.
