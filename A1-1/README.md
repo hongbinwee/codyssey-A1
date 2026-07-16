@@ -1,6 +1,6 @@
 # 나만의 프롬프트 관리 프로그램
 
-Codyssey A1-1 미션 산출물입니다. 파이썬 콘솔 프로그램으로 프롬프트를 추가하고, 목록 확인, 카테고리 조회, 검색, 상세 보기, 즐겨찾기 관리를 할 수 있습니다.
+Codyssey A1-1 미션 산출물입니다. 파이썬 콘솔 프로그램으로 프롬프트를 추가하고, 목록 확인, 카테고리 조회, 검색, 상세 보기, 즐겨찾기 관리, 수정/삭제, 조회수 기록, JSON 저장, Markdown 내보내기를 할 수 있습니다.
 
 ## 제출 정보
 
@@ -34,6 +34,11 @@ PYTHONPYCACHEPREFIX=/tmp/codyssey-a1-pycache python3 -m py_compile main_a1_1.py
 - 프롬프트 상세 보기
 - 즐겨찾기 추가 및 해제
 - 즐겨찾기 목록 보기
+- 프롬프트 수정 및 삭제
+- 상세 보기 조회수 기록
+- 조회수 Top 목록 보기
+- JSON 파일 저장 및 불러오기
+- 카테고리별 Markdown 파일 내보내기
 - 중복 제목 입력 방지
 - 잘못된 번호 및 빈 입력 안내
 
@@ -45,7 +50,7 @@ PYTHONPYCACHEPREFIX=/tmp/codyssey-a1-pycache python3 -m py_compile main_a1_1.py
 - 이미지 생성: 제품 썸네일 이미지 프롬프트
 - 자동화: 뉴스 요약 자동화 프롬프트
 
-데이터는 리스트와 딕셔너리로 관리하며, 프로그램 실행 중에만 유지됩니다.
+데이터는 리스트와 딕셔너리로 관리하며, `prompts.json` 파일로 저장하고 다시 불러옵니다. 저장 파일이 없으면 기본 데이터로 시작합니다.
 
 ## 요구사항 대응표
 
@@ -67,18 +72,29 @@ PYTHONPYCACHEPREFIX=/tmp/codyssey-a1-pycache python3 -m py_compile main_a1_1.py
 | GitHub 업로드 | `origin/main`에 push 완료 |
 | Git 환경 확인 | Git 버전과 사용자 정보(`user.name`, `user.email`) 설정 확인 |
 | 샘플 저장소 clone | 공개 샘플 저장소 clone 후 폴더 구조와 로그 확인 |
+| 보너스 1: JSON 영속화 | `prompts.json` 저장 및 프로그램 시작 시 불러오기 |
+| 보너스 1: Markdown 내보내기 | `exports/prompts_by_category.md` 파일 생성 |
+| 보너스 2: 수정/삭제 | 메뉴에서 프롬프트 수정 및 삭제 가능 |
+| 보너스 2: 사용 기록 | 상세 보기 시 조회수 증가 |
+| 보너스 2: Top 목록 | 조회수 기준으로 프롬프트 정렬 출력 |
 
 ## 코드 구조
 
 - `create_default_prompts()`: 기본 프롬프트 데이터 생성
+- `load_prompts()`: JSON 파일에서 프롬프트 불러오기
+- `save_prompts()`: 프롬프트 목록을 JSON 파일로 저장
 - `show_menu()`: 메뉴 출력
 - `add_prompt()`: 프롬프트 추가
 - `show_list()`: 전체 목록 출력
 - `show_categories()`: 카테고리별 조회
 - `search_prompt()`: 키워드 검색
 - `show_prompt_detail()`: 상세 보기
+- `edit_prompt()`: 프롬프트 수정
+- `delete_prompt()`: 프롬프트 삭제
 - `toggle_favorite()`: 즐겨찾기 추가/해제
 - `show_favorites()`: 즐겨찾기 목록 출력
+- `show_top_prompts()`: 조회수 기준 Top 목록 출력
+- `export_prompts_to_markdown()`: 카테고리별 Markdown 내보내기
 
 ## Git 작업 요약
 
@@ -201,7 +217,7 @@ main
 
 ### 데이터 영속화
 
-현재 프로그램은 프롬프트를 리스트에 저장하므로 프로그램을 종료하면 실행 중 추가한 데이터가 사라집니다. 종료 후에도 데이터를 유지하려면 JSON 파일에 프롬프트 리스트를 저장하고, 프로그램 시작 시 JSON 파일을 다시 읽어오는 구조로 확장할 수 있습니다. JSON은 현재 사용 중인 리스트와 딕셔너리 구조를 그대로 표현하기 쉬워 이 프로그램에 적합합니다.
+현재 프로그램은 프롬프트를 리스트와 딕셔너리로 관리하고, 변경된 데이터를 `prompts.json` 파일에 저장합니다. 프로그램 시작 시 `load_prompts()`가 JSON 파일을 읽고, 파일이 없거나 형식이 올바르지 않으면 기본 데이터로 시작합니다. JSON은 현재 사용 중인 리스트와 딕셔너리 구조를 그대로 표현하기 쉬워 이 프로그램에 적합합니다.
 
 ### 병합 충돌 해결 순서
 

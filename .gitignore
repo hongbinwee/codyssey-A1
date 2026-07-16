@@ -3,3 +3,5 @@ __pycache__/
 .DS_Store
 trash/
 A1-1/handoff.md
+A1-1/prompts.json
+A1-1/exports/
