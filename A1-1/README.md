@@ -84,6 +84,39 @@ PYTHONPYCACHEPREFIX=/tmp/codyssey-a1-pycache python3 -m py_compile main_a1_1.py
 - `feature/a1-1-list-view` 브랜치에서 목록 기능을 구현한 뒤 `main`으로 병합했습니다.
 - 최종 Git 로그는 `스크린샷/07-final-git-log-graph.png`에서 확인할 수 있습니다.
 
+## Git 커밋 및 브랜치 기록
+
+| 항목 | 내용 |
+| --- | --- |
+| 기본 브랜치 | `main` |
+| 원격 저장소 | `origin https://github.com/hongbinwee/codyssey-A1.git` |
+| 전체 커밋 수 | 23개 |
+| 기능 작업 브랜치 | `feature/a1-1-list-view` |
+| 병합 커밋 | `1bae160 merge: add prompt list feature` |
+| 최종 push 상태 | `main`과 `origin/main` 동기화 완료 |
+
+주요 기능 단위 커밋:
+
+- `deb6dcf chore: start a1-1 script entrypoint`
+- `a7c6334 feat: add default prompt data`
+- `8c9e152 feat: implement prompt creation`
+- `1bf93c6 feat: render prompt list`
+- `d36c18b feat: filter prompts by category`
+- `2ea6132 feat: search prompts by keyword`
+- `bce82d9 feat: show prompt details`
+- `3e0a11b feat: toggle prompt favorites`
+- `cfa189b feat: list favorite prompts`
+- `7ded147 fix: improve prompt input validation`
+
+브랜치 작업 흐름:
+
+```text
+main
+  -> feature/a1-1-list-view 생성
+  -> 프롬프트 목록 기능 구현
+  -> main으로 병합
+```
+
 ## 제출 스크린샷
 
 ### 1. Python 버전 확인 및 Hello 실행
