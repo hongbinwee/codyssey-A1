@@ -107,6 +107,47 @@ def get_optional_input(message, current_value):
     return current_value
 
 
+# 여러 줄 내용 입력을 담당하는 함수입니다.
+# 한 줄에 마침표(.)만 입력하면 입력을 종료하고, 최소 한 줄 이상 입력하도록 검증합니다.
+def get_multiline_input(message):
+    while True:
+        print(f"{message} 여러 줄 입력 가능, 입력 완료는 한 줄에 . 입력")
+        lines = []
+
+        while True:
+            line = input()
+            if line == ".":
+                break
+            lines.append(line)
+
+        content = "\n".join(lines).strip()
+        if content:
+            return content
+        print("내용이 비어 있습니다. 다시 입력해주세요.")
+
+
+# 수정 기능에서 여러 줄 내용을 바꿀 때 사용하는 함수입니다.
+# 첫 줄에서 바로 Enter를 누르면 기존 내용을 유지하고, 그 외에는 . 입력 전까지 새 내용으로 저장합니다.
+def get_optional_multiline_input(message, current_value):
+    print(f"{message} (유지하려면 첫 줄에서 Enter, 입력 완료는 한 줄에 . 입력)")
+    first_line = input()
+    if first_line == "":
+        return current_value
+
+    lines = [first_line]
+    while True:
+        line = input()
+        if line == ".":
+            break
+        lines.append(line)
+
+    content = "\n".join(lines).strip()
+    if content:
+        return content
+    print("새 내용이 비어 있어 기존 내용을 유지합니다.")
+    return current_value
+
+
 # 프롬프트 제목 중복 여부를 확인합니다.
 # 수정 중인 항목의 인덱스는 제외해 자기 자신과 충돌하지 않게 합니다.
 def is_duplicate_title(prompts, title, ignore_index=None):
@@ -167,7 +208,7 @@ def choose_category(current_category=None):
 def add_prompt(prompts):
     print("\n=== 프롬프트 추가 ===")
     title = get_unique_title(prompts)
-    content = get_non_empty_input("내용: ")
+    content = get_multiline_input("내용:")
     category = choose_category()
 
     prompts.append(create_prompt(title, content, category))
@@ -308,7 +349,7 @@ def edit_prompt(prompts):
 
     prompt = prompts[prompt_index]
     prompt["title"] = get_updated_title(prompts, prompt["title"], prompt_index)
-    prompt["content"] = get_optional_input("새 내용", prompt["content"])
+    prompt["content"] = get_optional_multiline_input("새 내용", prompt["content"])
     prompt["category"] = choose_category(prompt["category"])
     save_prompts(prompts)
     print("프롬프트가 수정되었습니다.")

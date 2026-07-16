@@ -39,6 +39,7 @@ PYTHONPYCACHEPREFIX=/tmp/codyssey-a1-pycache python3 -m py_compile main_a1_1.py
 - 조회수 Top 목록 보기
 - JSON 파일 저장 및 불러오기
 - 카테고리별 Markdown 파일 내보내기
+- 프롬프트 내용 여러 줄 입력
 - 중복 제목 입력 방지
 - 잘못된 번호 및 빈 입력 안내
 
@@ -52,6 +53,8 @@ PYTHONPYCACHEPREFIX=/tmp/codyssey-a1-pycache python3 -m py_compile main_a1_1.py
 
 데이터는 리스트와 딕셔너리로 관리하며, `prompts.json` 파일로 저장하고 다시 불러옵니다. 저장 파일이 없으면 기본 데이터로 시작합니다.
 
+프롬프트 내용을 입력할 때는 여러 줄을 사용할 수 있습니다. 내용 입력을 마치려면 한 줄에 `.`만 입력합니다.
+
 ## 요구사항 대응표
 
 | 미션 요구사항 | 반영 내용 |
@@ -60,6 +63,7 @@ PYTHONPYCACHEPREFIX=/tmp/codyssey-a1-pycache python3 -m py_compile main_a1_1.py
 | 콘솔 메뉴 기반 프로그램 | `main_a1_1.py` 실행 시 번호 선택 메뉴 제공 |
 | 기본 프롬프트 3개 이상 | 기본 데이터 3개 포함 |
 | 프롬프트 추가 | 제목, 내용, 카테고리 입력 후 등록 |
+| 여러 줄 내용 입력 | 내용 입력 완료 시 한 줄에 `.` 입력 |
 | 프롬프트 목록 | 번호, 카테고리, 제목, 즐겨찾기 표시 |
 | 카테고리별 조회 | 선택한 카테고리의 프롬프트만 출력 |
 | 검색 | 제목 또는 내용 키워드 검색 |
