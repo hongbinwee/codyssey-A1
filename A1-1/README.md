@@ -114,8 +114,29 @@ PYTHONPYCACHEPREFIX=/tmp/codyssey-a1-pycache python3 -m py_compile main_a1_1.py
 
 ![최종 git log 그래프](./스크린샷/07-final-git-log-graph.png)
 
-## 남은 제출 전 확인
+### 8. 프로그램 메뉴 화면
 
-- 프로그램 메뉴 화면 캡처
-- 프롬프트 추가 완료 화면 캡처
-- 목록, 검색, 즐겨찾기 화면 캡처
+![프로그램 메뉴 화면](./스크린샷/08-program-menu.png)
+
+### 9. 프롬프트 추가 후 목록 화면
+
+![프롬프트 추가 후 목록 화면](./스크린샷/09-program-list-after-add.png)
+
+### 10. 프롬프트 목록 화면
+
+![프롬프트 목록 화면](./스크린샷/10-program-list-view.png)
+
+### 11. 프롬프트 검색 결과 화면
+
+![프롬프트 검색 결과 화면](./스크린샷/11-program-search-result.png)
+
+### 12. 즐겨찾기 목록 화면
+
+![즐겨찾기 목록 화면](./스크린샷/12-program-favorites.png)
+
+## 제출 전 최종 확인
+
+- 프로그램 실행 결과 스크린샷 포함 완료
+- 개발 환경 설정 스크린샷 포함 완료
+- 최종 Git 로그 스크린샷 포함 완료
+- GitHub 저장소 URL과 실행 방법 기재 완료
