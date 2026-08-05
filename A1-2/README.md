@@ -1,0 +1,171 @@
+# 인터넷 정보를 받아와서 여행지 추천해주는 파이썬 프로그램
+
+A1-2 미션 산출물입니다. 사용자가 여행 날짜를 입력하면 LLM API가 국내 추천 지역을 JSON으로 만들고, Kakao Local API가 해당 지역의 맛집을 검색한 뒤, 최종 여행 리포트를 Markdown 파일로 저장합니다.
+
+## 제출 정보
+
+- 미션 폴더: `A1-2/`
+- 실행 파일: `travel_planner.py`
+- 원본 데이터 저장 위치: `results/YYYY-MM-DD_raw.json`
+- 최종 리포트 저장 위치: `results/YYYY-MM-DD_travel_plan.md`
+- 선택한 API 조합: OpenAI 계열 API + Kakao Local API
+
+## 실행 환경
+
+- Python 3.10 이상
+- 터미널 실행
+- 웹 UI 없음
+- 외부 패키지 설치 없이 Python 표준 라이브러리만 사용
+
+## API 키 설정
+
+API 키는 코드에 직접 쓰지 않습니다. `A1-2/.env` 파일 또는 환경변수로 설정합니다.
+
+`.env.example`을 참고해 `A1-2/.env` 파일을 만듭니다.
+
+```text
+OPENAI_API_KEY=YOUR_OPENAI_API_KEY
+OPENAI_MODEL=gpt-4o-mini
+KAKAO_REST_API_KEY=YOUR_KAKAO_REST_API_KEY
+```
+
+Windows PowerShell에서 현재 터미널 세션에만 설정하려면 아래처럼 입력합니다.
+
+```powershell
+$env:OPENAI_API_KEY="YOUR_KEY"
+$env:KAKAO_REST_API_KEY="YOUR_KEY"
+```
+
+macOS/Linux에서는 아래처럼 입력합니다.
+
+```bash
+export OPENAI_API_KEY="YOUR_KEY"
+export KAKAO_REST_API_KEY="YOUR_KEY"
+```
+
+실제 키 값은 README, 코드, 결과 파일, Git 커밋에 포함하지 않습니다.
+
+## 실행 방법
+
+작업공간 루트에서 실행:
+
+```bash
+cd A1-2
+python travel_planner.py --date "2026-03-15"
+```
+
+미션 원문에 맞춰 `-date` 형식도 지원합니다.
+
+```bash
+python travel_planner.py -date "2026-03-15"
+```
+
+도움말 확인:
+
+```bash
+python travel_planner.py --help
+```
+
+문법 검증:
+
+```bash
+python -m py_compile travel_planner.py
+```
+
+## 실행 흐름
+
+```text
+[1/3] 1차 추천 생성 중(LLM)...
+  - recommended_city: "제주"
+[2/3] 맛집 검색 중(지도/장소 API)...
+  - 맛집 5곳 검색 완료
+[3/3] 최종 리포트 생성 중(LLM)...
+  - 리포트 생성 완료
+
+완료! results/2026-03-15_travel_plan.md 를 확인하세요.
+원본 데이터: results/2026-03-15_raw.json
+```
+
+## 결과물 확인
+
+실행 후 `results/` 폴더에 아래 파일이 생성됩니다.
+
+| 파일 | 내용 |
+| --- | --- |
+| `YYYY-MM-DD_raw.json` | 1차 추천 JSON, 맛집 검색 결과, 오류 요약 |
+| `YYYY-MM-DD_travel_plan.md` | 최종 국내 여행 추천 리포트 |
+
+원본 JSON에는 최소한 아래 구조가 들어갑니다.
+
+```json
+{
+  "date": "2026-03-15",
+  "recommendation": {
+    "recommended_city": "제주",
+    "weather": "3월 중순의 일반적 날씨 요약",
+    "events": ["행사 후보"],
+    "reason": "추천 근거"
+  },
+  "restaurants": [],
+  "errors": []
+}
+```
+
+## 주요 기능
+
+- `argparse` 기반 CLI 실행
+- `-date` 또는 `--date` 필수 옵션 지원
+- `YYYY-MM-DD` 날짜 형식 검증
+- `.env` 또는 환경변수에서 API 키 읽기
+- OpenAI 계열 API로 1차 추천 JSON 생성
+- LLM JSON 파싱 실패 시 최대 1회 재시도
+- Kakao Local API로 추천 도시 맛집 검색
+- 맛집 검색 0건 또는 API 실패 시 리포트 생성 계속 진행
+- 최종 Markdown 여행 리포트 생성
+- 원본 JSON과 Markdown 파일을 `results/`에 저장
+- 오류 목록을 `errors` 배열로 관리
+
+## 요구사항 대응표
+
+| 미션 요구사항 | 반영 내용 |
+| --- | --- |
+| Python 3.10 이상 | 표준 라이브러리 기반 Python 프로그램 |
+| CLI 기반 프로그램 | `travel_planner.py`를 터미널에서 실행 |
+| `argparse` 사용 | `parse_args()`에서 인자 처리 |
+| 필수 옵션 `-date "YYYY-MM-DD"` | `-date`, `--date` 모두 지원 |
+| 날짜 형식 검증 | 형식 오류 시 argparse 사용법 출력 후 종료 |
+| LLM API 택1 | OpenAI 계열 API 사용 |
+| 지도/장소 API 택1 | Kakao Local 키워드 검색 API 사용 |
+| LLM 1차 추천 JSON | `recommended_city`, `weather`, `events`, `reason` 생성 |
+| JSON 파싱 가능 출력 | JSON 전용 프롬프트와 파싱 함수 사용 |
+| 맛집 N곳 검색 | 추천 도시 + `맛집` 키워드로 최대 5곳 검색 |
+| 맛집 0건 처리 | 중단하지 않고 `데이터 없음`으로 리포트 진행 |
+| 최종 Markdown 리포트 | 추천 지역, 이유, 날씨, 행사, 맛집, 일정, 오류 요약 포함 |
+| API 호출/파싱 오류 처리 | `try-except`와 `errors` 배열 사용 |
+| API 키 미설정 처리 | 설정 방법 안내 후 즉시 종료 |
+| 지도 API 실패 처리 | 맛집 빈 목록으로 두고 리포트 생성 계속 |
+| LLM JSON 파싱 실패 처리 | 최대 1회 재시도 |
+| API 키 보안 | `.env`, 환경변수, `.gitignore`, `.env.example` 사용 |
+| 결과 저장 | `results/YYYY-MM-DD_raw.json`, `results/YYYY-MM-DD_travel_plan.md` 생성 |
+
+## 오류 처리 정책
+
+- API 키 미설정: 프로그램을 종료하고 설정 방법을 안내합니다.
+- LLM JSON 파싱 실패: 한 번만 재요청합니다.
+- Kakao Local 인증/네트워크/쿼터 오류: `errors`에 기록하고 맛집은 `데이터 없음`으로 처리합니다.
+- 최종 리포트 생성 실패: 프로그램 내부에서 기본 Markdown 리포트를 생성합니다.
+
+## API 키 보안 주의
+
+API 키를 코드에 직접 쓰면 GitHub 업로드나 화면 공유 중 외부에 노출될 수 있습니다. 또한 키 교체가 필요할 때 코드를 수정해야 하고, 과금/쿼터가 있는 서비스에서 사고가 날 수 있습니다.
+
+그래서 이 프로그램은 실제 키를 `.env` 또는 환경변수에서만 읽습니다. `.env`와 실행 결과 JSON/Markdown은 `.gitignore`에 등록했습니다.
+
+## 보너스 과제
+
+이번 기본 제출에서는 보너스 과제를 구현하지 않았습니다.
+
+- 복수 지역 추천: 제외
+- 결과 캐싱: 제외
+
+보너스는 선택 사항이므로 필수 요구사항을 먼저 안정적으로 만족하는 방향으로 구성했습니다.
