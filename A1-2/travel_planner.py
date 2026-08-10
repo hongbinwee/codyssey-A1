@@ -71,8 +71,9 @@ def call_openai_chat(api_key, model, messages, temperature=0.4):
     payload = {
         "model": model,
         "messages": messages,
-        "temperature": temperature,
     }
+    if not model.startswith("gpt-5"):
+        payload["temperature"] = temperature
     headers = {
         "Authorization": f"Bearer {api_key}",
         "Content-Type": "application/json",
