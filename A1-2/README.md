@@ -203,12 +203,15 @@ python -m py_compile travel_planner.py
 
 ## 캐시, 도시 정규화, 검색 추상화
 
-- 같은 날짜의 완전한 `results/YYYY-MM-DD_raw.json`과 Markdown이 있으면 유효성을 확인한 뒤 API를 다시 호출하지 않고 재사용합니다.
+- 같은 날짜의 완전한 `results/YYYY-MM-DD_raw.json`이 있으면 Markdown 유무와 관계없이 유효성을 확인한 뒤 API를 다시 호출하지 않고 재사용합니다.
+- raw JSON은 있지만 Markdown이 없거나 비어 있으면 API를 호출하지 않고 로컬 fallback Markdown을 재생성합니다.
 - JSON이 손상됐거나 날짜·필수 키가 다르면 캐시를 무시하고 정상 흐름으로 다시 실행합니다.
 - `서울`, `서울시`, `서울특별시`처럼 흔한 도시 표기는 검색 전에 같은 검색어로 정규화합니다.
 - 장소 검색은 `PlaceSearchProvider` 인터페이스 뒤에 있으며, 현재 실제 공급자는 `KakaoPlaceSearchProvider` 하나입니다.
 
 캐시는 같은 날짜를 반복 실행할 때 API 비용을 줄이는 보완 기능입니다. 여행 날짜를 바꾸면 별도 결과 파일을 사용합니다.
+
+LLM이 만든 Markdown은 저장 전에 필수 섹션(`추천 지역`, `추천 이유`, `날씨 요약`, `행사/축제`, `맛집 추천`, `1일 일정 제안`, `오류 요약(errors)`)을 확인합니다. 하나라도 빠지면 기본 Markdown 리포트로 대체합니다.
 
 ## 테스트
 

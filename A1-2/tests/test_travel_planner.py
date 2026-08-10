@@ -68,6 +68,17 @@ class TravelPlannerTests(unittest.TestCase):
         self.assertEqual(call.call_count, 2)
         self.assertEqual(errors[0]["type"], "JSON_PARSE_RETRY")
 
+    def test_generate_report_falls_back_when_required_section_is_missing(self):
+        errors = []
+
+        with patch.object(travel_planner, "call_openai_chat", return_value="# incomplete report"):
+            report = travel_planner.generate_report(
+                "key", "gpt-5.6-luna", "2026-03-15", VALID_RECOMMENDATION, [], errors
+            )
+
+        self.assertIn("## 오류 요약(errors)", report)
+        self.assertEqual(errors[0]["type"], "REPORT_GENERATION_FALLBACK")
+
     def test_normalize_city_name_handles_common_suffixes(self):
         self.assertEqual(travel_planner.normalize_city_name(" 서울특별시 "), "서울")
         self.assertEqual(travel_planner.normalize_city_name("부산시"), "부산")
@@ -103,6 +114,29 @@ class TravelPlannerTests(unittest.TestCase):
 
         self.assertIsNotNone(cached)
         self.assertEqual(cached[0], VALID_RECOMMENDATION)
+
+    def test_load_cached_outputs_accepts_raw_json_without_report(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            base_dir = Path(temp_dir)
+            results_dir = base_dir / "results"
+            results_dir.mkdir()
+            (results_dir / "2026-03-15_raw.json").write_text(
+                json.dumps(
+                    {
+                        "date": "2026-03-15",
+                        "recommendation": VALID_RECOMMENDATION,
+                        "restaurants": [],
+                        "errors": [],
+                    },
+                    ensure_ascii=False,
+                ),
+                encoding="utf-8",
+            )
+
+            cached = travel_planner.load_cached_outputs(base_dir, "2026-03-15", [])
+
+        self.assertIsNotNone(cached)
+        self.assertIsNone(cached[3])
 
     def test_load_cached_outputs_ignores_incomplete_cache(self):
         with tempfile.TemporaryDirectory() as temp_dir:

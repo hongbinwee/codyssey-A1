@@ -4,7 +4,7 @@
 
 - A1-2 미션 원문을 `A1-2 미션 원문.md`로 보존했다.
 - OpenAI 계열 API + Kakao Local API 조합을 사용한다.
-- `travel_planner.py`에 GPT-5 모델 호환 요청, 추천 JSON 검증, JSON 오류 1회 재시도, 장소 검색 추상화, 도시명 정규화, 날짜별 결과 캐시, 저장 오류 기록을 반영했다.
+- `travel_planner.py`에 GPT-5 모델 호환 요청, 추천 JSON 검증, JSON 오류 1회 재시도, 장소 검색 추상화, 도시명 정규화, raw JSON 기준 날짜별 결과 캐시, Markdown 필수 섹션 검증, 저장 오류 기록을 반영했다.
 - API 키는 로컬 `.env`에만 있으며 문서·코드·결과에는 기록하지 않는다.
 
 ## 생성한 문서
@@ -21,10 +21,11 @@
 
 ## 검증 결과
 
-- `python3 -m unittest discover -s A1-2/tests -v`: 8개 통과.
+- `python3 -m unittest discover -s A1-2/tests -v`: 12개 통과.
 - `python3 -m py_compile A1-2/travel_planner.py`: 확인 필요.
 - `--help`, 잘못된 날짜, 키 누락 동작: 기존 확인 완료.
 - 실제 OpenAI/Kakao 실행: OpenAI 추천·최종 리포트는 성공했고, Kakao는 `HTTP 403`이 발생했다. 응답 원인은 앱의 `OPEN_MAP_AND_LOCAL` 서비스 비활성화이며, 프로그램은 `데이터 없음`으로 계속 진행해 결과 파일을 저장했다.
+- 캐시 보완: raw JSON만 있고 Markdown이 없는 경우에도 API 없이 fallback Markdown을 생성하도록 회귀 테스트로 확인했다.
 
 ## 다음 작업
 

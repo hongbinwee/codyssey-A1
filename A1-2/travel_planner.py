@@ -10,6 +10,15 @@ from urllib import error, parse, request
 
 OPENAI_CHAT_COMPLETIONS_URL = "https://api.openai.com/v1/chat/completions"
 KAKAO_KEYWORD_SEARCH_URL = "https://dapi.kakao.com/v2/local/search/keyword.json"
+REQUIRED_REPORT_HEADINGS = (
+    "추천 지역",
+    "추천 이유",
+    "날씨 요약",
+    "행사/축제",
+    "맛집 추천",
+    "1일 일정 제안",
+    "오류 요약(errors)",
+)
 
 
 def load_dotenv(env_path):
@@ -358,6 +367,12 @@ def build_fallback_report(travel_date, recommendation, restaurants, errors):
     return "\n".join(lines) + "\n"
 
 
+def validate_report_sections(report):
+    missing = [heading for heading in REQUIRED_REPORT_HEADINGS if heading not in report]
+    if missing:
+        raise ValueError(f"report missing required sections: {', '.join(missing)}")
+
+
 def generate_report(api_key, model, travel_date, recommendation, restaurants, errors):
     prompt = f"""
 Create a Korean Markdown travel report.
@@ -393,7 +408,9 @@ Do not include API keys or invented reference links.
     ]
 
     try:
-        return call_openai_chat(api_key, model, messages, temperature=0.5).strip() + "\n"
+        report = call_openai_chat(api_key, model, messages, temperature=0.5).strip() + "\n"
+        validate_report_sections(report)
+        return report
     except Exception as exc:
         errors.append(
             {
@@ -410,7 +427,7 @@ def load_cached_outputs(base_dir, travel_date, errors):
     raw_path = results_dir / f"{travel_date}_raw.json"
     report_path = results_dir / f"{travel_date}_travel_plan.md"
 
-    if not raw_path.exists() or not report_path.exists():
+    if not raw_path.exists():
         return None
 
     try:
@@ -421,8 +438,10 @@ def load_cached_outputs(base_dir, travel_date, errors):
         validate_recommendation(recommendation)
         restaurants = raw_data["restaurants"]
         cached_errors = raw_data["errors"]
-        report = report_path.read_text(encoding="utf-8")
-        if not isinstance(restaurants, list) or not isinstance(cached_errors, list) or not report.strip():
+        report = None
+        if report_path.exists():
+            report = report_path.read_text(encoding="utf-8")
+        if not isinstance(restaurants, list) or not isinstance(cached_errors, list):
             return None
     except (OSError, json.JSONDecodeError) as exc:
         errors.append(
@@ -504,6 +523,18 @@ def main():
     cached = load_cached_outputs(base_dir, args.date, errors)
     if cached:
         recommendation, restaurants, errors, report, raw_path, report_path = cached
+        if not report:
+            report = build_fallback_report(args.date, recommendation, restaurants, errors)
+            saved_raw_path, saved_report_path = save_outputs(
+                base_dir,
+                args.date,
+                recommendation,
+                restaurants,
+                errors,
+                report,
+            )
+            raw_path = saved_raw_path or raw_path
+            report_path = saved_report_path or report_path
         print(f"캐시된 결과를 재사용합니다: {report_path}")
         print(f"원본 데이터: {raw_path}")
         return
