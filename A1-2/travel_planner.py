@@ -441,6 +441,10 @@ def load_cached_outputs(base_dir, travel_date, errors):
         report = None
         if report_path.exists():
             report = report_path.read_text(encoding="utf-8")
+            try:
+                validate_report_sections(report)
+            except ValueError:
+                report = None
         if not isinstance(restaurants, list) or not isinstance(cached_errors, list):
             return None
     except (OSError, json.JSONDecodeError) as exc:

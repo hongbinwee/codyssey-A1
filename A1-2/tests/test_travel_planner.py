@@ -115,6 +115,33 @@ class TravelPlannerTests(unittest.TestCase):
         self.assertIsNotNone(cached)
         self.assertEqual(cached[0], VALID_RECOMMENDATION)
 
+    def test_load_cached_outputs_rebuilds_report_when_cached_sections_are_missing(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            base_dir = Path(temp_dir)
+            results_dir = base_dir / "results"
+            results_dir.mkdir()
+            (results_dir / "2026-03-15_raw.json").write_text(
+                json.dumps(
+                    {
+                        "date": "2026-03-15",
+                        "recommendation": VALID_RECOMMENDATION,
+                        "restaurants": [],
+                        "errors": [],
+                    },
+                    ensure_ascii=False,
+                ),
+                encoding="utf-8",
+            )
+            (results_dir / "2026-03-15_travel_plan.md").write_text(
+                "# incomplete cached report",
+                encoding="utf-8",
+            )
+
+            cached = travel_planner.load_cached_outputs(base_dir, "2026-03-15", [])
+
+        self.assertIsNotNone(cached)
+        self.assertIsNone(cached[3])
+
     def test_load_cached_outputs_accepts_raw_json_without_report(self):
         with tempfile.TemporaryDirectory() as temp_dir:
             base_dir = Path(temp_dir)
