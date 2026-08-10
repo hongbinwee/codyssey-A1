@@ -120,6 +120,13 @@ def validate_recommendation(data):
     if not all(isinstance(item, str) for item in data["events"]):
         raise ValueError("events must be an array of strings")
 
+    if not 1 <= len(data["events"]) <= 3:
+        raise ValueError("events must contain 1-3 items")
+
+    sentence_count = len(re.findall(r"[.!?。！？](?=\s|$)", data["reason"].strip()))
+    if not 2 <= sentence_count <= 4:
+        raise ValueError("reason must contain 2-4 sentences")
+
 
 def generate_recommendation(api_key, model, travel_date, errors):
     system_prompt = (
@@ -149,7 +156,19 @@ Do not include API keys, citations, or unverified links.
     try:
         first_response = call_openai_chat(api_key, model, messages, temperature=0.2)
         return extract_json_object(first_response)
-    except Exception as exc:
+    except error.HTTPError as exc:
+        errors.append(classify_http_error("llm_recommendation", exc))
+        raise
+    except (error.URLError, TimeoutError) as exc:
+        errors.append(
+            {
+                "step": "llm_recommendation",
+                "type": "NETWORK_ERROR",
+                "message": str(exc),
+            }
+        )
+        raise
+    except (ValueError, KeyError, TypeError) as exc:
         errors.append(
             {
                 "step": "llm_recommendation",
@@ -175,7 +194,7 @@ Do not include API keys, citations, or unverified links.
     try:
         retry_response = call_openai_chat(api_key, model, repair_messages, temperature=0.0)
         return extract_json_object(retry_response)
-    except Exception as exc:
+    except (ValueError, KeyError, TypeError) as exc:
         errors.append(
             {
                 "step": "llm_recommendation",
@@ -202,51 +221,91 @@ def classify_http_error(step, exc):
     }
 
 
+def normalize_city_name(city):
+    aliases = {
+        "서울시": "서울",
+        "서울특별시": "서울",
+        "부산시": "부산",
+        "부산광역시": "부산",
+        "대구시": "대구",
+        "대구광역시": "대구",
+        "인천시": "인천",
+        "인천광역시": "인천",
+        "광주시": "광주",
+        "광주광역시": "광주",
+        "대전시": "대전",
+        "대전광역시": "대전",
+        "울산시": "울산",
+        "울산광역시": "울산",
+        "세종시": "세종",
+        "세종특별자치시": "세종",
+        "제주도": "제주",
+        "제주특별자치도": "제주",
+    }
+    cleaned = " ".join(str(city).strip().split())
+    return aliases.get(cleaned, cleaned)
+
+
+class PlaceSearchProvider:
+    def search(self, city, errors):
+        raise NotImplementedError
+
+
+class KakaoPlaceSearchProvider(PlaceSearchProvider):
+    def __init__(self, kakao_key, size=5):
+        self.kakao_key = kakao_key
+        self.size = size
+
+    def search(self, city, errors):
+        normalized_city = normalize_city_name(city)
+        query = f"{normalized_city} 맛집"
+        params = parse.urlencode({"query": query, "size": self.size})
+        url = f"{KAKAO_KEYWORD_SEARCH_URL}?{params}"
+        headers = {"Authorization": f"KakaoAK {self.kakao_key}"}
+
+        try:
+            data = call_json_api(url, headers=headers, timeout=30)
+        except error.HTTPError as exc:
+            errors.append(classify_http_error("place_search", exc))
+            return []
+        except Exception as exc:
+            errors.append(
+                {
+                    "step": "place_search",
+                    "type": "NETWORK_OR_PARSE_ERROR",
+                    "message": str(exc),
+                }
+            )
+            return []
+
+        documents = data.get("documents", [])
+        if not documents:
+            errors.append(
+                {
+                    "step": "place_search",
+                    "type": "EMPTY_RESULT",
+                    "message": f"0 results for query={query}",
+                }
+            )
+            return []
+
+        restaurants = []
+        for item in documents[: self.size]:
+            restaurants.append(
+                {
+                    "name": item.get("place_name", ""),
+                    "address": item.get("road_address_name") or item.get("address_name", ""),
+                    "category": item.get("category_name", ""),
+                    "url": item.get("place_url", ""),
+                    "x": safe_float(item.get("x")),
+                    "y": safe_float(item.get("y")),
+                }
+            )
+        return restaurants
+
+
 def search_kakao_restaurants(kakao_key, city, errors, size=5):
-    query = f"{city} 맛집"
-    params = parse.urlencode({"query": query, "size": size})
-    url = f"{KAKAO_KEYWORD_SEARCH_URL}?{params}"
-    headers = {"Authorization": f"KakaoAK {kakao_key}"}
-
-    try:
-        data = call_json_api(url, headers=headers, timeout=30)
-    except error.HTTPError as exc:
-        errors.append(classify_http_error("place_search", exc))
-        return []
-    except Exception as exc:
-        errors.append(
-            {
-                "step": "place_search",
-                "type": "NETWORK_OR_PARSE_ERROR",
-                "message": str(exc),
-            }
-        )
-        return []
-
-    documents = data.get("documents", [])
-    if not documents:
-        errors.append(
-            {
-                "step": "place_search",
-                "type": "EMPTY_RESULT",
-                "message": f"0 results for query={query}",
-            }
-        )
-        return []
-
-    restaurants = []
-    for item in documents[:size]:
-        restaurants.append(
-            {
-                "name": item.get("place_name", ""),
-                "address": item.get("road_address_name") or item.get("address_name", ""),
-                "category": item.get("category_name", ""),
-                "url": item.get("place_url", ""),
-                "x": safe_float(item.get("x")),
-                "y": safe_float(item.get("y")),
-            }
-        )
-    return restaurants
+    return KakaoPlaceSearchProvider(kakao_key, size=size).search(city, errors)
 
 
 def safe_float(value):
@@ -346,9 +405,53 @@ Do not include API keys or invented reference links.
         return build_fallback_report(travel_date, recommendation, restaurants, errors)
 
 
+def load_cached_outputs(base_dir, travel_date, errors):
+    results_dir = base_dir / "results"
+    raw_path = results_dir / f"{travel_date}_raw.json"
+    report_path = results_dir / f"{travel_date}_travel_plan.md"
+
+    if not raw_path.exists() or not report_path.exists():
+        return None
+
+    try:
+        raw_data = json.loads(raw_path.read_text(encoding="utf-8"))
+        if raw_data.get("date") != travel_date:
+            return None
+        recommendation = raw_data["recommendation"]
+        validate_recommendation(recommendation)
+        restaurants = raw_data["restaurants"]
+        cached_errors = raw_data["errors"]
+        report = report_path.read_text(encoding="utf-8")
+        if not isinstance(restaurants, list) or not isinstance(cached_errors, list) or not report.strip():
+            return None
+    except (OSError, json.JSONDecodeError) as exc:
+        errors.append(
+            {
+                "step": "cache_read",
+                "type": "CACHE_READ_ERROR",
+                "message": str(exc),
+            }
+        )
+        return None
+    except (KeyError, TypeError, ValueError):
+        return None
+
+    return recommendation, restaurants, cached_errors, report, raw_path, report_path
+
+
 def save_outputs(base_dir, travel_date, recommendation, restaurants, errors, report):
     results_dir = base_dir / "results"
-    results_dir.mkdir(exist_ok=True)
+    try:
+        results_dir.mkdir(exist_ok=True)
+    except OSError as exc:
+        errors.append(
+            {
+                "step": "output_save",
+                "type": "OUTPUT_WRITE_ERROR",
+                "message": str(exc),
+            }
+        )
+        return None, None
 
     raw_path = results_dir / f"{travel_date}_raw.json"
     report_path = results_dir / f"{travel_date}_travel_plan.md"
@@ -360,19 +463,50 @@ def save_outputs(base_dir, travel_date, recommendation, restaurants, errors, rep
         "errors": errors,
     }
 
-    raw_path.write_text(
-        json.dumps(raw_data, ensure_ascii=False, indent=2),
-        encoding="utf-8",
-    )
-    report_path.write_text(report, encoding="utf-8")
+    saved_raw_path = None
+    saved_report_path = None
+    try:
+        raw_path.write_text(
+            json.dumps(raw_data, ensure_ascii=False, indent=2),
+            encoding="utf-8",
+        )
+        saved_raw_path = raw_path
+    except OSError as exc:
+        errors.append(
+            {
+                "step": "output_save",
+                "type": "OUTPUT_WRITE_ERROR",
+                "message": str(exc),
+            }
+        )
 
-    return raw_path, report_path
+    try:
+        report_path.write_text(report, encoding="utf-8")
+        saved_report_path = report_path
+    except OSError as exc:
+        errors.append(
+            {
+                "step": "output_save",
+                "type": "OUTPUT_WRITE_ERROR",
+                "message": str(exc),
+            }
+        )
+
+    return saved_raw_path, saved_report_path
 
 
 def main():
     base_dir = Path(__file__).resolve().parent
     load_dotenv(base_dir / ".env")
     args = parse_args()
+
+    errors = []
+    cached = load_cached_outputs(base_dir, args.date, errors)
+    if cached:
+        recommendation, restaurants, errors, report, raw_path, report_path = cached
+        print(f"캐시된 결과를 재사용합니다: {report_path}")
+        print(f"원본 데이터: {raw_path}")
+        return
 
     openai_key = require_env(
         "OPENAI_API_KEY",
@@ -383,7 +517,6 @@ def main():
         'Set it in PowerShell: $env:KAKAO_REST_API_KEY="YOUR_KEY"',
     )
     model = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
-    errors = []
 
     print("[1/3] 1차 추천 생성 중(LLM)...")
     recommendation = generate_recommendation(openai_key, model, args.date, errors)
@@ -417,6 +550,10 @@ def main():
         errors,
         report,
     )
+    if raw_path is None or report_path is None:
+        print("  - 결과 파일 저장에 실패했습니다. errors를 확인하세요.")
+        return
+
     print("  - 리포트 생성 완료")
     print()
     print(f"완료! {report_path} 를 확인하세요.")

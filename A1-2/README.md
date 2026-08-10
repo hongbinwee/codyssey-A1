@@ -25,7 +25,7 @@ API 키는 코드에 직접 쓰지 않습니다. `A1-2/.env` 파일 또는 환�
 
 ```text
 OPENAI_API_KEY=YOUR_OPENAI_API_KEY
-OPENAI_MODEL=gpt-4o-mini
+OPENAI_MODEL=gpt-5.6-luna
 KAKAO_REST_API_KEY=YOUR_KAKAO_REST_API_KEY
 ```
 
@@ -44,6 +44,27 @@ export KAKAO_REST_API_KEY="YOUR_KEY"
 ```
 
 실제 키 값은 README, 코드, 결과 파일, Git 커밋에 포함하지 않습니다.
+
+## HTTP 메서드 선택 근거
+
+OpenAI 호출은 `POST`를 사용합니다. 모델 이름과 대화 메시지, 응답 형식 요구사항이 요청 본문에 들어가기 때문입니다.
+
+Kakao Local 키워드 검색은 `GET`을 사용합니다. 검색어와 크기 같은 필터가 읽기 전용 쿼리 파라미터에 자연스럽게 들어가기 때문입니다.
+
+이 선택은 HTTP 설계 관점의 설명이며, 보안 보장을 의미하지는 않습니다. 실제 보안은 키를 코드에 두지 않고 `.env` 또는 환경변수로만 관리하는 것으로 확보합니다.
+
+## 프롬프트와 재시도 정책
+
+1차 추천 LLM 응답은 JSON 전용으로 다룹니다. 요구 키는 아래 4개입니다.
+
+- `recommended_city`
+- `weather`
+- `events`
+- `reason`
+
+미션 기준과 현재 평가 기준에서는 `events`가 1~3개 문자열이어야 하고, `reason`은 2~4문장 범위가 기대됩니다. 현재 구현은 JSON 파싱과 필수 키/타입 검증을 수행하고, JSON 파싱이나 검증에 실패했을 때만 1회 repair retry를 시도합니다.
+
+HTTP 오류, 인증 실패, 쿼터 초과는 JSON으로 다시 해석하지 않습니다. 그런 경우에는 `errors`에 기록하고 다음 단계로 넘어갑니다.
 
 ## 실행 방법
 
@@ -125,6 +146,31 @@ python -m py_compile travel_planner.py
 - 원본 JSON과 Markdown 파일을 `results/`에 저장
 - 오류 목록을 `errors` 배열로 관리
 
+## 오류 기록 형식과 점검 포인트
+
+`errors`에는 아래 구조의 항목이 누적됩니다.
+
+```json
+{
+  "step": "place_search",
+  "type": "AUTH_ERROR",
+  "message": "HTTP 403"
+}
+```
+
+`step`은 어느 단계에서 문제가 났는지, `type`은 오류 분류, `message`는 사람이 읽을 수 있는 요약입니다.
+
+401/403이 보이면 아래를 먼저 확인합니다.
+
+- `.env`의 변수 이름이 `OPENAI_API_KEY`, `OPENAI_MODEL`, `KAKAO_REST_API_KEY`인지
+- 요청 헤더 형식이 OpenAI는 `Authorization: Bearer ...`, Kakao는 `Authorization: KakaoAK ...`인지
+- Kakao REST 키가 해당 앱의 로컬 검색 권한을 갖고 있는지
+- OpenAI 계정/프로젝트가 현재 `OPENAI_MODEL`에 접근할 수 있는지
+
+현재 실행에서 Kakao는 `HTTP 403`과 함께 `OPEN_MAP_AND_LOCAL service` 비활성화 응답을 반환했습니다. Kakao Developers에서 해당 앱의 로컬/지도 서비스 사용 설정을 확인해야 합니다.
+
+키 값은 출력하지 말고, 존재 여부와 이름만 확인합니다.
+
 ## 요구사항 대응표
 
 | 미션 요구사항 | 반영 내용 |
@@ -154,6 +200,23 @@ python -m py_compile travel_planner.py
 - LLM JSON 파싱 실패: 한 번만 재요청합니다.
 - Kakao Local 인증/네트워크/쿼터 오류: `errors`에 기록하고 맛집은 `데이터 없음`으로 처리합니다.
 - 최종 리포트 생성 실패: 프로그램 내부에서 기본 Markdown 리포트를 생성합니다.
+
+## 캐시, 도시 정규화, 검색 추상화
+
+- 같은 날짜의 완전한 `results/YYYY-MM-DD_raw.json`과 Markdown이 있으면 유효성을 확인한 뒤 API를 다시 호출하지 않고 재사용합니다.
+- JSON이 손상됐거나 날짜·필수 키가 다르면 캐시를 무시하고 정상 흐름으로 다시 실행합니다.
+- `서울`, `서울시`, `서울특별시`처럼 흔한 도시 표기는 검색 전에 같은 검색어로 정규화합니다.
+- 장소 검색은 `PlaceSearchProvider` 인터페이스 뒤에 있으며, 현재 실제 공급자는 `KakaoPlaceSearchProvider` 하나입니다.
+
+캐시는 같은 날짜를 반복 실행할 때 API 비용을 줄이는 보완 기능입니다. 여행 날짜를 바꾸면 별도 결과 파일을 사용합니다.
+
+## 테스트
+
+외부 API를 호출하지 않는 회귀 테스트는 아래처럼 실행합니다.
+
+```bash
+python3 -m unittest discover -s tests -v
+```
 
 ## API 키 보안 주의
 
