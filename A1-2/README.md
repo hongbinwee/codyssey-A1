@@ -1,6 +1,6 @@
 # 인터넷 정보를 받아와서 여행지 추천해주는 파이썬 프로그램
 
-A1-2 미션 산출물입니다. 사용자가 여행 날짜를 입력하면 LLM API가 국내 추천 지역을 JSON으로 만들고, Kakao Local API가 해당 지역의 맛집을 검색한 뒤, 최종 여행 리포트를 Markdown 파일로 저장합니다.
+A1-2 미션 산출물입니다. 사용자가 여행 날짜를 입력하면 LLM API가 국내 추천 지역을 JSON으로 만들고, Kakao Local API가 해당 지역의 맛집을 검색한 뒤, 최종 여행 리포트를 Markdown 파일로 저장합니다. `--multi-region`을 선택하면 2~3개 지역을 각각 검색하는 보너스 모드도 사용할 수 있습니다.
 
 ## 제출 정보
 
@@ -55,7 +55,7 @@ Kakao Local 키워드 검색은 `GET`을 사용합니다. 검색어와 크기 �
 
 ## 프롬프트와 재시도 정책
 
-1차 추천 LLM 응답은 JSON 전용으로 다룹니다. 요구 키는 아래 4개입니다.
+기본 모드의 1차 추천 LLM 응답은 JSON 전용으로 다룹니다. 요구 키는 아래 4개입니다.
 
 - `recommended_city`
 - `weather`
@@ -63,6 +63,36 @@ Kakao Local 키워드 검색은 `GET`을 사용합니다. 검색어와 크기 �
 - `reason`
 
 미션 기준과 현재 평가 기준에서는 `events`가 1~3개 문자열이어야 하고, `reason`은 2~4문장 범위가 기대됩니다. 현재 구현은 JSON 파싱과 필수 키/타입 검증을 수행하고, JSON 파싱이나 검증에 실패했을 때만 1회 repair retry를 시도합니다.
+
+복수 지역 모드에서는 다음 구조를 사용합니다.
+
+```json
+{
+  "recommended_cities": ["제주", "강릉", "부산"],
+  "region_details": [
+    {
+      "city": "제주",
+      "weather": "온화하고 바람이 있습니다.",
+      "events": ["유채꽃 행사"],
+      "reason": "봄 풍경을 즐기기 좋습니다. 해안 산책을 함께 할 수 있습니다."
+    },
+    {
+      "city": "강릉",
+      "weather": "선선하고 맑습니다.",
+      "events": ["해변 문화 행사"],
+      "reason": "바다 풍경을 보기 좋습니다. 카페와 전통시장을 함께 둘러볼 수 있습니다."
+    },
+    {
+      "city": "부산",
+      "weather": "따뜻하고 쾌청합니다.",
+      "events": ["항구 축제"],
+      "reason": "도시와 바다를 함께 즐길 수 있습니다. 대중교통으로 이동하기 편리합니다."
+    }
+  ]
+}
+```
+
+`recommended_cities`는 2~3개의 중복 없는 도시여야 하며, `region_details`에는 각 도시의 날씨·행사·추천 이유가 하나씩 있어야 합니다.
 
 HTTP 오류, 인증 실패, 쿼터 초과는 JSON으로 다시 해석하지 않습니다. 그런 경우에는 `errors`에 기록하고 다음 단계로 넘어갑니다.
 
@@ -73,6 +103,12 @@ HTTP 오류, 인증 실패, 쿼터 초과는 JSON으로 다시 해석하지 않�
 ```bash
 cd A1-2
 python travel_planner.py --date "2026-03-15"
+```
+
+복수 지역 추천 보너스를 실행하려면 선택 옵션을 추가합니다.
+
+```bash
+python travel_planner.py --date "2026-03-15" --multi-region
 ```
 
 미션 원문에 맞춰 `-date` 형식도 지원합니다.
@@ -132,6 +168,8 @@ python -m py_compile travel_planner.py
 }
 ```
 
+복수 지역 모드의 원본 JSON은 `mode: "multi"`, `recommendation.recommended_cities`, `recommendation.region_details`, `restaurants_by_city`, `errors`를 저장합니다.
+
 ## 주요 기능
 
 - `argparse` 기반 CLI 실행
@@ -139,8 +177,10 @@ python -m py_compile travel_planner.py
 - `YYYY-MM-DD` 날짜 형식 검증
 - `.env` 또는 환경변수에서 API 키 읽기
 - OpenAI 계열 API로 1차 추천 JSON 생성
+- `--multi-region` 선택 시 2~3개 지역 추천 JSON 생성
 - LLM JSON 파싱 실패 시 최대 1회 재시도
 - Kakao Local API로 추천 도시 맛집 검색
+- 복수 지역 모드에서 지역별 Kakao 맛집 검색 반복
 - 맛집 검색 0건 또는 API 실패 시 리포트 생성 계속 진행
 - 최종 Markdown 여행 리포트 생성
 - 원본 JSON과 Markdown 파일을 `results/`에 저장
@@ -159,6 +199,7 @@ python -m py_compile travel_planner.py
 ```
 
 `step`은 어느 단계에서 문제가 났는지, `type`은 오류 분류, `message`는 사람이 읽을 수 있는 요약입니다.
+복수 지역 모드의 장소 검색 오류에는 문제가 발생한 `city`도 함께 기록합니다.
 
 401/403이 보이면 아래를 먼저 확인합니다.
 
@@ -180,9 +221,9 @@ python -m py_compile travel_planner.py
 | 날짜 형식 검증 | 형식 오류 시 argparse 사용법 출력 후 종료 |
 | LLM API 택1 | OpenAI 계열 API 사용 |
 | 지도/장소 API 택1 | Kakao Local 키워드 검색 API 사용 |
-| LLM 1차 추천 JSON | `recommended_city`, `weather`, `events`, `reason` 생성 |
+| LLM 1차 추천 JSON | 기본 모드는 `recommended_city`, 복수 모드는 `recommended_cities`와 `region_details` 생성 |
 | JSON 파싱 가능 출력 | JSON 전용 프롬프트와 파싱 함수 사용 |
-| 맛집 N곳 검색 | 추천 도시 + `맛집` 키워드로 최대 5곳 검색 |
+| 맛집 N곳 검색 | 추천 도시 + `맛집` 키워드로 최대 5곳 검색, 복수 모드는 지역별 반복 |
 | 맛집 0건 처리 | 중단하지 않고 `데이터 없음`으로 리포트 진행 |
 | 최종 Markdown 리포트 | 추천 지역, 이유, 날씨, 행사, 맛집, 일정, 오류 요약 포함 |
 | API 호출/파싱 오류 처리 | `try-except`와 `errors` 배열 사용 |
@@ -201,15 +242,16 @@ python -m py_compile travel_planner.py
 
 ## 캐시, 도시 정규화, 검색 추상화
 
-- 같은 날짜의 완전한 `results/YYYY-MM-DD_raw.json`이 있으면 Markdown 유무와 관계없이 유효성을 확인한 뒤 API를 다시 호출하지 않고 재사용합니다.
+- 같은 날짜의 완전한 `results/YYYY-MM-DD_raw.json`이 있으면 Markdown 유무와 관계없이 현재 실행 모드에 맞는지 확인한 뒤 API를 다시 호출하지 않고 재사용합니다.
 - raw JSON은 있지만 Markdown이 없거나 비어 있으면 API를 호출하지 않고 로컬 fallback Markdown을 재생성합니다.
 - JSON이 손상됐거나 날짜·필수 키가 다르면 캐시를 무시하고 정상 흐름으로 다시 실행합니다.
+- 기존 `mode` 없는 raw JSON은 단일 모드 캐시로 읽고, 복수 모드 캐시는 `mode: "multi"`와 지역별 필드를 모두 요구합니다. 단일/복수 형식이 다르면 서로의 캐시를 재사용하지 않습니다.
 - `서울`, `서울시`, `서울특별시`처럼 흔한 도시 표기는 검색 전에 같은 검색어로 정규화합니다.
 - 장소 검색은 `PlaceSearchProvider` 인터페이스 뒤에 있으며, 현재 실제 공급자는 `KakaoPlaceSearchProvider` 하나입니다.
 
 캐시는 같은 날짜를 반복 실행할 때 API 비용을 줄이는 보완 기능입니다. 여행 날짜를 바꾸면 별도 결과 파일을 사용합니다.
 
-LLM이 만든 Markdown은 저장 전에 필수 섹션(`추천 지역`, `추천 이유`, `날씨 요약`, `행사/축제`, `맛집 추천`, `1일 일정 제안`, `오류 요약(errors)`)을 확인합니다. 하나라도 빠지면 기본 Markdown 리포트로 대체합니다.
+LLM이 만든 Markdown은 저장 전에 모드별 필수 섹션을 확인합니다. 단일 모드는 `추천 지역`, `추천 이유`, `날씨 요약`, `행사/축제`, `맛집 추천`, `1일 일정 제안`, `오류 요약(errors)`을, 복수 모드는 `추천 지역`, `지역별 추천`, `날씨 요약`, `행사/축제`, `지역별 맛집 추천`, `1일 일정 제안`, `오류 요약(errors)`을 요구합니다. 하나라도 빠지면 해당 모드의 기본 Markdown 리포트로 대체합니다.
 
 ## 테스트
 
@@ -227,9 +269,9 @@ API 키를 코드에 직접 쓰면 GitHub 업로드나 화면 공유 중 외부�
 
 ## 보너스 과제
 
-선택 보너스 중 결과 캐싱은 구현했습니다. 같은 날짜의 완전한 raw JSON을 재사용하고, Markdown이 없거나 필수 섹션이 빠진 경우에는 API를 호출하지 않고 fallback Markdown을 재생성합니다.
+선택 보너스 중 결과 캐싱과 복수 지역 추천을 구현했습니다. 같은 날짜의 완전한 raw JSON을 현재 모드에 맞게 재사용하고, Markdown이 없거나 필수 섹션이 빠진 경우에는 API를 호출하지 않고 해당 모드의 fallback Markdown을 재생성합니다.
 
-- 복수 지역 추천: 미구현
+- 복수 지역 추천: 구현 완료 (`--multi-region`)
 - 결과 캐싱: 구현 완료
 
-복수 지역 추천은 구현했다고 표시하지 않으며, 현재 제출 범위에서는 단일 추천 지역만 사용합니다.
+복수 지역 모드에서는 한 지역의 검색 결과가 0건이거나 오류여도 다른 지역 검색을 계속하고, 지역별 목록과 `errors`에 결과를 남깁니다.

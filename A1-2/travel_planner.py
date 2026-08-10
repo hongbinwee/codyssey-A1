@@ -19,6 +19,17 @@ REQUIRED_REPORT_HEADINGS = (
     "1일 일정 제안",
     "오류 요약(errors)",
 )
+MULTI_REPORT_HEADINGS = (
+    "추천 지역",
+    "지역별 추천",
+    "날씨 요약",
+    "행사/축제",
+    "지역별 맛집 추천",
+    "1일 일정 제안",
+    "오류 요약(errors)",
+)
+SINGLE_MODE = "single"
+MULTI_MODE = "multi"
 
 
 def load_dotenv(env_path):
@@ -44,6 +55,11 @@ def parse_args():
         "--date",
         required=True,
         help='Travel date in YYYY-MM-DD format. Example: --date "2026-03-15"',
+    )
+    parser.add_argument(
+        "--multi-region",
+        action="store_true",
+        help="Enable the optional 2-3 city recommendation bonus mode.",
     )
     args = parser.parse_args()
 
@@ -97,7 +113,7 @@ def call_openai_chat(api_key, model, messages, temperature=0.4):
     return data["choices"][0]["message"]["content"]
 
 
-def extract_json_object(text):
+def extract_json_object(text, multi_region=False):
     cleaned = text.strip()
     fence_match = re.search(r"```(?:json)?\s*(.*?)```", cleaned, flags=re.DOTALL)
     if fence_match:
@@ -109,7 +125,10 @@ def extract_json_object(text):
         cleaned = cleaned[first : last + 1]
 
     parsed = json.loads(cleaned)
-    validate_recommendation(parsed)
+    if multi_region:
+        validate_multi_recommendation(parsed)
+    else:
+        validate_recommendation(parsed)
     return parsed
 
 
@@ -126,23 +145,93 @@ def validate_recommendation(data):
         if not isinstance(data[key], expected_type):
             raise ValueError(f"{key} must be {expected_type.__name__}")
 
-    if not all(isinstance(item, str) for item in data["events"]):
-        raise ValueError("events must be an array of strings")
+    validate_events_and_reason(data["events"], data["reason"])
 
-    if not 1 <= len(data["events"]) <= 3:
-        raise ValueError("events must contain 1-3 items")
 
-    sentence_count = len(re.findall(r"[.!?。！？](?=\s|$)", data["reason"].strip()))
+def validate_events_and_reason(events, reason, scope=""):
+    prefix = f"{scope} " if scope else ""
+    if not all(isinstance(item, str) for item in events):
+        raise ValueError(f"{prefix}events must be an array of strings")
+
+    if not 1 <= len(events) <= 3:
+        raise ValueError(f"{prefix}events must contain 1-3 items")
+
+    sentence_count = len(re.findall(r"[.!?。！？](?=\s|$)", reason.strip()))
     if not 2 <= sentence_count <= 4:
-        raise ValueError("reason must contain 2-4 sentences")
+        raise ValueError(f"{prefix}reason must contain 2-4 sentences")
 
 
-def generate_recommendation(api_key, model, travel_date, errors):
+def validate_multi_recommendation(data):
+    if not isinstance(data, dict):
+        raise ValueError("multi recommendation must be an object")
+
+    cities = data.get("recommended_cities")
+    if not isinstance(cities, list) or not 2 <= len(cities) <= 3:
+        raise ValueError("recommended_cities must contain 2-3 items")
+    if not all(isinstance(city, str) and city.strip() for city in cities):
+        raise ValueError("recommended_cities must be non-empty strings")
+
+    normalized_cities = [normalize_city_name(city) for city in cities]
+    if len(set(normalized_cities)) != len(normalized_cities):
+        raise ValueError("recommended_cities must not contain duplicates")
+
+    details = data.get("region_details")
+    if not isinstance(details, list) or len(details) != len(cities):
+        raise ValueError("region_details must describe every recommended city")
+
+    detail_cities = []
+    for detail in details:
+        if not isinstance(detail, dict):
+            raise ValueError("region_details items must be objects")
+        for key, expected_type in {
+            "city": str,
+            "weather": str,
+            "events": list,
+            "reason": str,
+        }.items():
+            if key not in detail:
+                raise ValueError(f"region_details missing key: {key}")
+            if not isinstance(detail[key], expected_type):
+                raise ValueError(f"region_details.{key} must be {expected_type.__name__}")
+        detail_city = normalize_city_name(detail["city"])
+        detail_cities.append(detail_city)
+        validate_events_and_reason(detail["events"], detail["reason"], scope=detail_city)
+
+    if len(set(detail_cities)) != len(detail_cities):
+        raise ValueError("region_details must not contain duplicate cities")
+    if set(detail_cities) != set(normalized_cities):
+        raise ValueError("region_details cities must match recommended_cities")
+
+
+def generate_recommendation(api_key, model, travel_date, errors, multi_region=False):
     system_prompt = (
         "You are a Korean domestic travel recommendation assistant. "
         "Return only a JSON object. Do not wrap it in Markdown."
     )
-    user_prompt = f"""
+    if multi_region:
+        user_prompt = f"""
+Recommend 2 or 3 different Korean cities for a trip on {travel_date}.
+
+Return JSON only with this exact schema:
+{{
+  "recommended_cities": ["string", "string", "string"],
+  "region_details": [
+    {{
+      "city": "string",
+      "weather": "string",
+      "events": ["string"],
+      "reason": "2-4 Korean sentences"
+    }}
+  ]
+}}
+
+The recommended_cities array must contain exactly 2 or 3 unique cities.
+The region_details array must contain one item for every recommended city.
+The weather and event information can be a general seasonal estimate.
+Do not include API keys, citations, or unverified links.
+"""
+    else:
+        user_prompt = f"""
 Recommend one Korean city for a trip on {travel_date}.
 
 Return JSON only with this exact schema:
@@ -164,7 +253,7 @@ Do not include API keys, citations, or unverified links.
 
     try:
         first_response = call_openai_chat(api_key, model, messages, temperature=0.2)
-        return extract_json_object(first_response)
+        return extract_json_object(first_response, multi_region=multi_region)
     except error.HTTPError as exc:
         errors.append(classify_http_error("llm_recommendation", exc))
         raise
@@ -195,14 +284,19 @@ Do not include API keys, citations, or unverified links.
             "role": "user",
             "content": (
                 "The previous answer could not be parsed. "
-                "Return only valid JSON with the required keys: "
-                "recommended_city, weather, events, reason."
+                + (
+                    "Return only valid JSON with recommended_cities and "
+                    "region_details for every city."
+                    if multi_region
+                    else "Return only valid JSON with the required keys: "
+                    "recommended_city, weather, events, reason."
+                )
             ),
         },
     ]
     try:
         retry_response = call_openai_chat(api_key, model, repair_messages, temperature=0.0)
-        return extract_json_object(retry_response)
+        return extract_json_object(retry_response, multi_region=multi_region)
     except (ValueError, KeyError, TypeError) as exc:
         errors.append(
             {
@@ -317,6 +411,36 @@ def search_kakao_restaurants(kakao_key, city, errors, size=5):
     return KakaoPlaceSearchProvider(kakao_key, size=size).search(city, errors)
 
 
+def search_restaurants_by_city(provider, cities, errors):
+    restaurants_by_city = {}
+    for city in cities:
+        normalized_city = normalize_city_name(city)
+        error_start = len(errors)
+        try:
+            restaurants_by_city[normalized_city] = provider.search(normalized_city, errors)
+        except error.HTTPError as exc:
+            error_item = classify_http_error("place_search", exc)
+            error_item["city"] = normalized_city
+            errors.append(error_item)
+            restaurants_by_city[normalized_city] = []
+        except Exception as exc:
+            errors.append(
+                {
+                    "step": "place_search",
+                    "type": "NETWORK_OR_PARSE_ERROR",
+                    "message": str(exc),
+                    "city": normalized_city,
+                }
+            )
+            restaurants_by_city[normalized_city] = []
+
+        for item in errors[error_start:]:
+            if isinstance(item, dict):
+                item.setdefault("city", normalized_city)
+
+    return restaurants_by_city
+
+
 def safe_float(value):
     try:
         return float(value)
@@ -367,13 +491,108 @@ def build_fallback_report(travel_date, recommendation, restaurants, errors):
     return "\n".join(lines) + "\n"
 
 
-def validate_report_sections(report):
-    missing = [heading for heading in REQUIRED_REPORT_HEADINGS if heading not in report]
+def build_multi_fallback_report(travel_date, recommendation, restaurants_by_city, errors):
+    detail_by_city = {
+        normalize_city_name(detail["city"]): detail
+        for detail in recommendation["region_details"]
+    }
+    lines = [
+        f"# {travel_date} 국내 복수 지역 여행 추천 리포트",
+        "",
+        "## 추천 지역",
+        ", ".join(recommendation["recommended_cities"]),
+        "",
+        "## 지역별 추천",
+    ]
+    for city in recommendation["recommended_cities"]:
+        normalized_city = normalize_city_name(city)
+        detail = detail_by_city[normalized_city]
+        lines.extend(
+            [
+                f"### {normalized_city}",
+                f"- 추천 이유: {detail['reason']}",
+            ]
+        )
+
+    lines.extend(["", "## 날씨 요약"])
+    for city in recommendation["recommended_cities"]:
+        detail = detail_by_city[normalize_city_name(city)]
+        lines.append(f"- {normalize_city_name(city)}: {detail['weather']}")
+
+    lines.extend(["", "## 행사/축제"])
+    for city in recommendation["recommended_cities"]:
+        detail = detail_by_city[normalize_city_name(city)]
+        lines.append(f"### {normalize_city_name(city)}")
+        lines.extend([f"- {event}" for event in detail["events"]] or ["- 데이터 없음"])
+
+    lines.extend(["", "## 지역별 맛집 추천"])
+    for city in recommendation["recommended_cities"]:
+        normalized_city = normalize_city_name(city)
+        restaurants = restaurants_by_city.get(normalized_city, [])
+        lines.append(f"### {normalized_city}")
+        if restaurants:
+            for restaurant in restaurants:
+                detail = restaurant.get("address") or "주소 정보 없음"
+                lines.append(f"- {restaurant.get('name', '이름 없음')} ({detail})")
+        else:
+            lines.append("- 데이터 없음 (장소 검색 결과 0건 또는 API 오류)")
+
+    lines.extend(
+        [
+            "",
+            "## 1일 일정 제안",
+            "- 오전: 첫 번째 추천 지역의 대표 관광지 방문",
+            "- 오후: 두 번째 추천 지역의 행사 또는 산책 코스 확인",
+            "- 저녁: 이동 가능한 지역의 맛집 방문",
+            "",
+            "## 오류 요약(errors)",
+        ]
+    )
+    if errors:
+        lines.extend([f"- {item['step']}: {item['type']} - {item['message']}" for item in errors])
+    else:
+        lines.append("- 없음")
+
+    return "\n".join(lines) + "\n"
+
+
+def validate_report_sections(report, multi_region=False):
+    required_headings = MULTI_REPORT_HEADINGS if multi_region else REQUIRED_REPORT_HEADINGS
+    missing = [heading for heading in required_headings if heading not in report]
     if missing:
         raise ValueError(f"report missing required sections: {', '.join(missing)}")
 
 
-def generate_report(api_key, model, travel_date, recommendation, restaurants, errors):
+def generate_report(
+    api_key,
+    model,
+    travel_date,
+    recommendation,
+    restaurants,
+    errors,
+    multi_region=False,
+):
+    if multi_region:
+        section_text = """
+- 추천 지역
+- 지역별 추천
+- 날씨 요약
+- 행사/축제
+- 지역별 맛집 추천
+- 1일 일정 제안
+- 오류 요약(errors)
+"""
+    else:
+        section_text = """
+- 추천 지역
+- 추천 이유
+- 날씨 요약
+- 행사/축제
+- 맛집 추천
+- 1일 일정 제안
+- 오류 요약(errors)
+"""
+
     prompt = f"""
 Create a Korean Markdown travel report.
 
@@ -388,15 +607,9 @@ Errors:
 {json.dumps(errors, ensure_ascii=False, indent=2)}
 
 The report must include these sections:
-- 추천 지역
-- 추천 이유
-- 날씨 요약
-- 행사/축제
-- 맛집 추천
-- 1일 일정 제안
-- 오류 요약(errors)
+{section_text}
 
-If restaurants are empty, write "데이터 없음" in the restaurant section.
+If a city's restaurants are empty, write "데이터 없음" in that city's restaurant section.
 Do not include API keys or invented reference links.
 """
     messages = [
@@ -409,7 +622,7 @@ Do not include API keys or invented reference links.
 
     try:
         report = call_openai_chat(api_key, model, messages, temperature=0.5).strip() + "\n"
-        validate_report_sections(report)
+        validate_report_sections(report, multi_region=multi_region)
         return report
     except Exception as exc:
         errors.append(
@@ -419,10 +632,29 @@ Do not include API keys or invented reference links.
                 "message": str(exc),
             }
         )
+        if multi_region:
+            return build_multi_fallback_report(
+                travel_date,
+                recommendation,
+                restaurants,
+                errors,
+            )
         return build_fallback_report(travel_date, recommendation, restaurants, errors)
 
 
-def load_cached_outputs(base_dir, travel_date, errors):
+def validate_restaurants_by_city(restaurants_by_city, cities):
+    if not isinstance(restaurants_by_city, dict):
+        raise ValueError("restaurants_by_city must be an object")
+
+    expected_cities = {normalize_city_name(city) for city in cities}
+    actual_cities = set(restaurants_by_city)
+    if actual_cities != expected_cities:
+        raise ValueError("restaurants_by_city keys must match recommended_cities")
+    if not all(isinstance(items, list) for items in restaurants_by_city.values()):
+        raise ValueError("restaurants_by_city values must be arrays")
+
+
+def load_cached_outputs(base_dir, travel_date, errors, multi_region=False):
     results_dir = base_dir / "results"
     raw_path = results_dir / f"{travel_date}_raw.json"
     report_path = results_dir / f"{travel_date}_travel_plan.md"
@@ -434,18 +666,29 @@ def load_cached_outputs(base_dir, travel_date, errors):
         raw_data = json.loads(raw_path.read_text(encoding="utf-8"))
         if raw_data.get("date") != travel_date:
             return None
+        requested_mode = MULTI_MODE if multi_region else SINGLE_MODE
+        cached_mode = raw_data.get("mode", SINGLE_MODE)
+        if cached_mode != requested_mode:
+            return None
         recommendation = raw_data["recommendation"]
-        validate_recommendation(recommendation)
-        restaurants = raw_data["restaurants"]
+        if multi_region:
+            validate_multi_recommendation(recommendation)
+            restaurants = raw_data["restaurants_by_city"]
+            validate_restaurants_by_city(restaurants, recommendation["recommended_cities"])
+        else:
+            validate_recommendation(recommendation)
+            restaurants = raw_data["restaurants"]
         cached_errors = raw_data["errors"]
         report = None
         if report_path.exists():
             report = report_path.read_text(encoding="utf-8")
             try:
-                validate_report_sections(report)
+                validate_report_sections(report, multi_region=multi_region)
             except ValueError:
                 report = None
-        if not isinstance(restaurants, list) or not isinstance(cached_errors, list):
+        if not isinstance(cached_errors, list):
+            return None
+        if not multi_region and not isinstance(restaurants, list):
             return None
     except (OSError, json.JSONDecodeError) as exc:
         errors.append(
@@ -462,7 +705,15 @@ def load_cached_outputs(base_dir, travel_date, errors):
     return recommendation, restaurants, cached_errors, report, raw_path, report_path
 
 
-def save_outputs(base_dir, travel_date, recommendation, restaurants, errors, report):
+def save_outputs(
+    base_dir,
+    travel_date,
+    recommendation,
+    restaurants,
+    errors,
+    report,
+    multi_region=False,
+):
     results_dir = base_dir / "results"
     try:
         results_dir.mkdir(exist_ok=True)
@@ -481,10 +732,14 @@ def save_outputs(base_dir, travel_date, recommendation, restaurants, errors, rep
 
     raw_data = {
         "date": travel_date,
+        "mode": MULTI_MODE if multi_region else SINGLE_MODE,
         "recommendation": recommendation,
-        "restaurants": restaurants,
         "errors": errors,
     }
+    if multi_region:
+        raw_data["restaurants_by_city"] = restaurants
+    else:
+        raw_data["restaurants"] = restaurants
 
     saved_raw_path = None
     saved_report_path = None
@@ -522,13 +777,22 @@ def main():
     base_dir = Path(__file__).resolve().parent
     load_dotenv(base_dir / ".env")
     args = parse_args()
+    multi_region = args.multi_region
 
     errors = []
-    cached = load_cached_outputs(base_dir, args.date, errors)
+    cached = load_cached_outputs(base_dir, args.date, errors, multi_region=multi_region)
     if cached:
         recommendation, restaurants, errors, report, raw_path, report_path = cached
         if not report:
-            report = build_fallback_report(args.date, recommendation, restaurants, errors)
+            if multi_region:
+                report = build_multi_fallback_report(
+                    args.date,
+                    recommendation,
+                    restaurants,
+                    errors,
+                )
+            else:
+                report = build_fallback_report(args.date, recommendation, restaurants, errors)
             saved_raw_path, saved_report_path = save_outputs(
                 base_dir,
                 args.date,
@@ -536,6 +800,7 @@ def main():
                 restaurants,
                 errors,
                 report,
+                multi_region=multi_region,
             )
             raw_path = saved_raw_path or raw_path
             report_path = saved_report_path or report_path
@@ -554,19 +819,41 @@ def main():
     model = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
 
     print("[1/3] 1차 추천 생성 중(LLM)...")
-    recommendation = generate_recommendation(openai_key, model, args.date, errors)
-    print(f'  - recommended_city: "{recommendation["recommended_city"]}"')
+    recommendation = generate_recommendation(
+        openai_key,
+        model,
+        args.date,
+        errors,
+        multi_region=multi_region,
+    )
+    if multi_region:
+        print(f'  - recommended_cities: {json.dumps(recommendation["recommended_cities"], ensure_ascii=False)}')
+    else:
+        print(f'  - recommended_city: "{recommendation["recommended_city"]}"')
 
     print("[2/3] 맛집 검색 중(지도/장소 API)...")
-    restaurants = search_kakao_restaurants(
-        kakao_key,
-        recommendation["recommended_city"],
-        errors,
-    )
-    if restaurants:
-        print(f"  - 맛집 {len(restaurants)}곳 검색 완료")
+    if multi_region:
+        provider = KakaoPlaceSearchProvider(kakao_key)
+        restaurants = search_restaurants_by_city(
+            provider,
+            recommendation["recommended_cities"],
+            errors,
+        )
+        for city, city_restaurants in restaurants.items():
+            if city_restaurants:
+                print(f"  - {city}: 맛집 {len(city_restaurants)}곳 검색 완료")
+            else:
+                print(f"  - {city}: 맛집 데이터 없음. 다음 지역으로 진행합니다.")
     else:
-        print("  - 맛집 데이터 없음. 리포트 생성을 계속 진행합니다.")
+        restaurants = search_kakao_restaurants(
+            kakao_key,
+            recommendation["recommended_city"],
+            errors,
+        )
+        if restaurants:
+            print(f"  - 맛집 {len(restaurants)}곳 검색 완료")
+        else:
+            print("  - 맛집 데이터 없음. 리포트 생성을 계속 진행합니다.")
 
     print("[3/3] 최종 리포트 생성 중(LLM)...")
     report = generate_report(
@@ -576,6 +863,7 @@ def main():
         recommendation,
         restaurants,
         errors,
+        multi_region=multi_region,
     )
     raw_path, report_path = save_outputs(
         base_dir,
@@ -584,6 +872,7 @@ def main():
         restaurants,
         errors,
         report,
+        multi_region=multi_region,
     )
     if raw_path is None or report_path is None:
         print("  - 결과 파일 저장에 실패했습니다. errors를 확인하세요.")
