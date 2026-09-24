@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="ko" data-theme="light">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#ffffff" />
+    <meta
+      name="description"
+      content="AX Ground AI·AX 맞춤 진단 — 2~3분의 질문으로 조직의 AI·AX 다음 단계를 확인합니다."
+    />
+    <title>AI·AX 맞춤 진단 — AX Ground</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230066CC'/%3E%3Ctext x='16' y='21' font-family='Arial,sans-serif' font-size='13' font-weight='700' fill='white' text-anchor='middle'%3EAX%3C/text%3E%3C/svg%3E"
+    />
+    <script>
+      (function () {
+        var saved = null;
+        try { saved = window.localStorage.getItem("axg-theme"); } catch (e) {}
+        var theme =
+          saved ||
+          (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+        document.documentElement.dataset.theme = theme;
+      })();
+    </script>
+    <link rel="stylesheet" href="css/style.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"
+    />
+  </head>
+  <body class="subpage">
+    <a class="skip-link" href="#main">본문으로 건너뛰기</a>
+
+    <div class="container">
+      <div class="subpage-top">
+        <a class="brand" href="index.html">AX Ground</a>
+        <div class="header-right">
+          <button
+            class="icon-btn theme-toggle"
+            type="button"
+            aria-label="다크 모드로 전환"
+            aria-pressed="false"
+            title="테마 전환"
+          >
+            <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.4M12 19.1v2.4M2.5 12h2.4M19.1 12h2.4M5.3 5.3l1.7 1.7M17 17l1.7 1.7M18.7 5.3 17 7M7 17l-1.7 1.7"/></svg>
+            <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.4 14.2A8.5 8.5 0 0 1 9.8 3.6a8.5 8.5 0 1 0 10.6 10.6Z"/></svg>
+          </button>
+          <a class="subpage-exit" href="index.html">진단 나가기 ×</a>
+        </div>
+      </div>
+    </div>
+
+    <main id="main" class="subpage-main">
+      <div class="container">
+        <div class="diagnosis-stage">
+          <h1 class="subpage-title" style="text-align:center">AI·AX 맞춤 진단</h1>
+
+          <div class="diagnosis-progress">
+            <p class="diagnosis-progress-label" id="progressLabel">1 / 8</p>
+            <div class="progress-bar" role="progressbar" aria-label="진단 진행률" aria-valuemin="0" aria-valuemax="8" aria-valuenow="1" id="progressBar">
+              <div class="progress-fill" id="progressFill"></div>
+            </div>
+          </div>
+
+          <!-- 질문 카드: js/diagnosis.js가 렌더링 -->
+          <form class="question-card" id="questionCard" novalidate>
+            <h2 class="question-title" id="questionTitle"></h2>
+            <p class="question-helper" id="questionHelper"></p>
+            <div id="questionMount"></div>
+            <p class="field-error" id="questionError" role="alert"></p>
+            <div class="question-nav">
+              <button type="button" class="q-prev" id="prevQuestion">← 이전</button>
+              <button type="submit" class="q-next" id="nextQuestion">다음 →</button>
+            </div>
+          </form>
+
+          <!-- AI 분석 로딩 -->
+          <div class="question-card diagnosis-loading" id="loadingView" hidden aria-live="polite">
+            <div class="loading-spinner" aria-hidden="true"></div>
+            <h2 class="question-title">AI가 답변을 분석하고 있습니다</h2>
+            <p class="question-helper" id="loadingStatus">규칙 평가와 맞춤 제안을 생성하는 중입니다.</p>
+            <p class="fine-print">잠시만 기다려 주세요. 입력한 답변은 결과 표시 후 저장되지 않습니다.</p>
+          </div>
+
+          <!-- API 오류·타임아웃 -->
+          <div class="question-card diagnosis-error" id="errorView" hidden role="alert">
+            <h2 class="question-title">진단 결과를 생성하지 못했습니다</h2>
+            <p class="question-helper" id="errorMessage">일시적인 오류가 발생했습니다.</p>
+            <div class="question-nav">
+              <button type="button" class="q-prev" id="errorBack">← 답변 수정</button>
+              <button type="button" class="q-next" id="errorRetry">다시 시도 →</button>
+            </div>
+            <p class="fine-print">계속 실패하면 <a href="contact.html">빠른 상담</a>으로 문의할 수 있습니다. 입력한 답변은 저장되지 않습니다.</p>
+          </div>
+
+          <!-- 결과 화면 -->
+          <div id="resultView" hidden>
+            <div class="result-summary-card">
+              <h2>현재 상태 요약</h2>
+              <p id="resultSummary"></p>
+              <ul class="result-answers" id="answerSummary"></ul>
+            </div>
+
+            <div class="result-block" style="margin-top:20px">
+              <h3>5개 영역 평가</h3>
+              <ul class="score-list" id="scoreList"></ul>
+            </div>
+
+            <div class="result-grid">
+              <div class="result-col">
+                <div class="result-block">
+                  <h3>우선 해결 과제</h3>
+                  <ul class="result-list" id="resultTasks"></ul>
+                </div>
+                <div class="result-block">
+                  <h3>추천 시작 경로</h3>
+                  <p class="path-badge" id="resultPath"></p>
+                  <p id="resultPathReason"></p>
+                </div>
+                <div class="result-block">
+                  <h3>맞춤형 AI 교육안</h3>
+                  <dl class="result-dl" id="resultEducation"></dl>
+                </div>
+              </div>
+              <div class="result-col">
+                <div class="result-block">
+                  <h3>업무 진단·AX 적용 후보</h3>
+                  <ul class="result-list" id="resultAx"></ul>
+                </div>
+                <div class="result-block">
+                  <h3>실행 로드맵</h3>
+                  <ol class="result-list" id="resultRoadmap"></ol>
+                </div>
+                <div class="result-block">
+                  <h3>주의사항 · 추가 확인</h3>
+                  <ul class="result-list" id="resultCautions"></ul>
+                </div>
+              </div>
+            </div>
+
+            <div class="result-block" style="margin-top:20px">
+              <h3>상담 연결</h3>
+              <p>적합한 서비스: <strong id="resultService"></strong></p>
+              <ul class="result-list" id="resultTopics"></ul>
+            </div>
+
+            <!-- 후속 행동: 결과 확인 후 선택 (PRD §4, §7) -->
+            <form class="followup-panel" id="followupPanel" novalidate>
+              <h3>결과를 이메일로 받거나 상담으로 연결할 수 있습니다</h3>
+              <p class="question-helper">선택 사항입니다. 입력하지 않아도 위 결과는 그대로 확인할 수 있으며, 연락처는 AI 분석 요청에 포함되지 않았습니다.</p>
+              <div class="followup-grid">
+                <div class="field">
+                  <label class="field-label" for="dgEmail">이메일 (후속 요청 시 필수)</label>
+                  <input id="dgEmail" name="email" type="email" placeholder="example@email.com" autocomplete="email" />
+                  <p class="field-error" aria-live="polite"></p>
+                </div>
+                <div class="field">
+                  <label class="field-label" for="dgName">이름 (선택)</label>
+                  <input id="dgName" name="name" type="text" placeholder="이름을 입력해주세요" autocomplete="name" />
+                  <p class="field-error" aria-live="polite"></p>
+                </div>
+              </div>
+              <label class="consent-row">
+                <input type="checkbox" id="dgConsentEmail" />
+                <span>결과 이메일 수신을 위한 개인정보 수집·이용 동의 <span class="legal-pending">[법적 문구 검토 필요]</span></span>
+              </label>
+              <label class="consent-row">
+                <input type="checkbox" id="dgConsentConsult" />
+                <span>맞춤 상담 요청을 위한 개인정보 수집·이용 동의 <span class="legal-pending">[법적 문구 검토 필요]</span></span>
+              </label>
+              <label class="consent-row">
+                <input type="checkbox" id="dgConsentMarketing" />
+                <span>(선택) 교육·서비스 안내 수신 동의 <span class="legal-pending">[법적 문구 검토 필요]</span></span>
+              </label>
+              <div class="followup-actions">
+                <button class="btn btn--secondary" id="dgEmailBtn" type="submit" data-action="email" disabled>결과를 이메일로 받기</button>
+                <button class="btn btn--primary" id="dgConsultBtn" type="submit" data-action="consult" disabled>맞춤 상담 신청하기</button>
+              </div>
+              <p class="form-status" id="followupStatus" aria-live="polite"></p>
+            </form>
+
+            <p class="fine-print" id="resultDisclaimer" style="margin-top:14px"></p>
+          </div>
+
+          <p class="fine-print diagnosis-legal-note">※ 법적 동의 문구는 검토 후 확정됩니다.</p>
+        </div>
+      </div>
+    </main>
+
+    <script src="js/theme.js" defer></script>
+    <script src="js/diagnosis.js" defer></script>
+  </body>
+</html>

@@ -1,0 +1,26 @@
+# A1-3 .gitignore — 제출 패키지 보호 규칙
+
+# 비밀 값이 들어가는 env 파일은 모두 제외 (.env.example만 허용)
+.env
+.env.*
+!.env.example
+
+# Vercel 로컬 링크/캐시
+.vercel/
+
+# Python 캐시
+__pycache__/
+*.pyc
+
+# 로컬 에이전트/도구 메타
+.agents/
+.superpowers/
+
+# 비교·실험본 (최종 제출 웹사이트가 아님)
+/오픈디자인/
+/오픈디자인v1.html
+/first-screen/
+/brainstorm-preview/
+
+# 로컬 작업 인계 문서 (제출 패키지에서 제외)
+/handoff.md

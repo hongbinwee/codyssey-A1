@@ -1,0 +1,420 @@
+<!doctype html>
+<html lang="ko" data-theme="light">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#ffffff" />
+    <meta
+      name="description"
+      content="AX Ground는 AI 교육부터 업무 진단, 자동화 흐름 설계, AX 로드맵까지 실제 실행으로 연결합니다."
+    />
+    <title>AX Ground — AI 교육부터 자동화, AX 전환까지</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230066CC'/%3E%3Ctext x='16' y='21' font-family='Arial,sans-serif' font-size='13' font-weight='700' fill='white' text-anchor='middle'%3EAX%3C/text%3E%3C/svg%3E"
+    />
+    <script>
+      /* 테마 FOUC 방지: CSS 적용 전에 저장된 선택 또는 시스템 설정을 반영 */
+      (function () {
+        var saved = null;
+        try { saved = window.localStorage.getItem("axg-theme"); } catch (e) {}
+        var theme =
+          saved ||
+          (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+        document.documentElement.dataset.theme = theme;
+      })();
+    </script>
+    <link rel="stylesheet" href="css/style.css" />
+    <!-- Pretendard Variable: 한글 본문의 SF Pro 메트릭 근사. CDN 실패 시 시스템 폰트로 폴백 -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"
+    />
+    <!--
+      Mux HLS 재생은 js/slides.js가 처리한다.
+      Safari 등 네이티브 HLS는 그대로 사용하고, 미지원 브라우저에서
+      videoUrl이 실제로 설정된 경우에만 hls.js@1.5.20(CDN)을 동적 로드한다.
+    -->
+  </head>
+  <body>
+    <a class="skip-link" href="#main">본문으로 건너뛰기</a>
+
+    <!-- ============ H0 Header ============ -->
+    <header class="site-header">
+      <div class="container">
+        <a class="brand" href="index.html">AX Ground</a>
+        <div class="header-right">
+          <nav class="main-nav" aria-label="주요 메뉴">
+            <ul>
+              <li><a href="#services">서비스</a></li>
+              <li><a href="diagnosis.html">AI·AX 진단</a></li>
+              <li><a href="#process">진행 방식</a></li>
+              <li><a href="#faq">FAQ</a></li>
+              <li><a href="contact.html">문의</a></li>
+            </ul>
+          </nav>
+          <button
+            class="icon-btn theme-toggle"
+            type="button"
+            aria-label="다크 모드로 전환"
+            aria-pressed="false"
+            title="테마 전환"
+          >
+            <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.4M12 19.1v2.4M2.5 12h2.4M19.1 12h2.4M5.3 5.3l1.7 1.7M17 17l1.7 1.7M18.7 5.3 17 7M7 17l-1.7 1.7"/></svg>
+            <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.4 14.2A8.5 8.5 0 0 1 9.8 3.6a8.5 8.5 0 1 0 10.6 10.6Z"/></svg>
+          </button>
+          <a class="btn btn--primary btn--sm" href="diagnosis.html">AI·AX 진단 시작하기</a>
+          <button
+            class="icon-btn menu-toggle"
+            id="menuToggle"
+            type="button"
+            aria-label="메뉴 열기"
+            aria-expanded="false"
+            aria-controls="mobileNav"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+          </button>
+        </div>
+      </div>
+    </header>
+    <nav class="mobile-nav" id="mobileNav" aria-label="모바일 메뉴">
+      <a href="#services">서비스</a>
+      <a href="diagnosis.html">AI·AX 진단</a>
+      <a href="#process">진행 방식</a>
+      <a href="#faq">FAQ</a>
+      <a href="contact.html">문의</a>
+      <a class="btn btn--primary" href="diagnosis.html">AI·AX 진단 시작하기</a>
+    </nav>
+
+    <main id="main">
+      <!-- ============ H1 Hero ============ -->
+      <section class="hero" aria-labelledby="heroTitle">
+        <div class="container">
+          <div class="hero-copy">
+            <p class="eyebrow hero-eyebrow">AI EDUCATION · AUTOMATION · AX</p>
+            <h1 class="hero-headline" id="heroTitle">
+              AI 교육부터 자동화, AX 전환까지<br />
+              목표에 더 빠르게 도달하고 싶으신가요?<br />
+              AX Ground가 함께합니다.
+            </h1>
+            <p class="hero-description">
+              반복 업무는 자동화하고, 학습과 실행은 가속화합니다.<br />
+              AX Ground는 AI 교육부터 업무 진단, 자동화 흐름 설계, AX 로드맵까지 실제 실행으로 연결합니다.
+            </p>
+            <div class="hero-cta-row">
+              <a class="btn btn--primary" href="diagnosis.html">AI·AX 진단 시작하기</a>
+              <a class="btn btn--secondary" href="contact.html">맞춤 상담 문의</a>
+            </div>
+            <p class="hero-bridge">AI를 어디에 적용해야 할지 막막하다면 ↓</p>
+          </div>
+
+          <!-- Figma: AI Workflow Preview — 노드+연결선, [SCROLL INTERACTION] 어노테이션 상태 -->
+          <div class="workflow" aria-labelledby="workflowTitle">
+            <p class="eyebrow eyebrow--on-dark workflow-kicker">AI WORKFLOW PREVIEW</p>
+            <h2 class="workflow-title" id="workflowTitle">업무가 AI와 자동화로 연결되는 흐름</h2>
+            <p class="workflow-annotation">스크롤하면 노드 → 연결선 → 자동화 결과가 순서대로 생성됩니다.</p>
+            <div class="workflow-canvas" id="workflowCanvas" role="img" aria-label="업무 입력에서 AI 분석, 자동화 분기를 거쳐 교육·AX 실행 방향으로 이어지는 예시 워크플로우 다이어그램"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ H2 Customer Problems ============ -->
+      <section class="section section--parchment" id="problems" aria-labelledby="problemsTitle">
+        <div class="container">
+          <div class="section-head" data-reveal>
+            <p class="eyebrow">WHY AX GROUND</p>
+            <h2 class="section-title" id="problemsTitle">AI를 도입하고 싶은데, 어디서부터 시작해야 할까요?</h2>
+          </div>
+          <div class="problem-grid">
+            <article class="problem-card" data-reveal>
+              <p class="problem-num">01</p>
+              <p>우리 조직에 필요한 AI 교육이 무엇인지 모르겠다</p>
+            </article>
+            <article class="problem-card" data-reveal style="--reveal-delay: 80ms">
+              <p class="problem-num">02</p>
+              <p>도구는 도입했지만 실제 업무 활용이 이어지지 않는다</p>
+            </article>
+            <article class="problem-card" data-reveal style="--reveal-delay: 160ms">
+              <p class="problem-num">03</p>
+              <p>AX를 시작하고 싶지만 우선순위와 실행 로드맵이 없다</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ H3 Core Services ============ -->
+      <section class="section" id="services" aria-labelledby="servicesTitle">
+        <div class="container">
+          <div class="section-head" data-reveal>
+            <p class="eyebrow">CORE SERVICES</p>
+            <h2 class="section-title" id="servicesTitle">교육에서 실행까지, 조직 상황에 맞춰 연결합니다.</h2>
+          </div>
+          <div class="service-grid">
+            <article class="service-card" data-reveal>
+              <p class="service-tag">핵심 서비스</p>
+              <h3 class="service-title">맞춤형 AI 교육</h3>
+              <p>직무·조직·교육 목적을 기준으로 교육 내용을 설계하고 실습 중심으로 연결합니다.</p>
+            </article>
+            <article class="service-card" data-reveal style="--reveal-delay: 80ms">
+              <p class="service-tag">핵심 서비스</p>
+              <h3 class="service-title">업무 진단 및 AX 로드맵</h3>
+              <p>현재 업무와 AI 활용 수준을 진단하고, 실행 우선순위와 단계별 AX 방향을 제안합니다.</p>
+            </article>
+            <article class="service-card service-card--wide" data-reveal>
+              <p class="service-tag">확장 서비스</p>
+              <h3 class="service-title">AI 도구 및 MVP 제작</h3>
+              <p>교육·컨설팅에서 발견한 실제 문제를 AI 도구, 자동화, MVP 형태로 빠르게 검증합니다.</p>
+            </article>
+          </div>
+
+          <!-- 5개 슬라이드 캐러셀: 모든 슬라이드가 초기 로드 시 DOM에 마운트된다 (js/slides.js) -->
+          <div class="showcase" aria-labelledby="showcaseTitle">
+            <div class="showcase-head">
+              <h3 class="showcase-title" id="showcaseTitle">서비스 미리보기</h3>
+              <p class="showcase-count" id="slideCount" aria-live="polite">1 / 5</p>
+            </div>
+            <div
+              class="slide-stage"
+              id="slideStage"
+              role="region"
+              aria-roledescription="carousel"
+              aria-label="AX Ground 서비스 미리보기 슬라이드"
+              tabindex="0"
+            ></div>
+            <div class="slide-controls">
+              <div class="slide-arrows">
+                <button class="icon-btn" id="slidePrev" type="button" aria-label="이전 슬라이드">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>
+                </button>
+                <button class="icon-btn" id="slideNext" type="button" aria-label="다음 슬라이드">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
+                </button>
+              </div>
+              <div class="slide-dots" id="slideDots" role="tablist" aria-label="슬라이드 선택"></div>
+            </div>
+            <p class="fine-print slide-note">※ 각 슬라이드의 영상은 Mux HLS로 연결될 예정입니다. 영상 자산이 준비되기 전에는 미리보기 화면이 표시됩니다.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ H4 AI·AX Diagnosis Teaser (dark) ============ -->
+      <section class="section section--dark diagnosis-teaser" id="diagnosis" aria-labelledby="diagnosisTitle">
+        <div class="container">
+          <div class="section-head" data-reveal>
+            <p class="eyebrow eyebrow--on-dark">AI·AX 맞춤 진단</p>
+            <h2 class="section-title section-title--on-dark" id="diagnosisTitle">2~3분 안에 우리 조직의 AI·AX 다음 단계를 확인하세요.</h2>
+          </div>
+          <div class="teaser-row">
+            <div class="teaser-card teaser-card--dark" data-reveal>
+              <h3>질문 미리보기</h3>
+              <p>조직 유형 / AI 활용 수준 / 업무 문제 / 교육 목적</p>
+              <div class="teaser-choices" aria-hidden="true">
+                <span class="teaser-choice">거의 사용하지 않음</span>
+                <span class="teaser-choice">개인적으로 일부 사용</span>
+                <span class="teaser-choice">팀 단위로 활용</span>
+              </div>
+            </div>
+            <div class="teaser-card teaser-card--light" data-reveal style="--reveal-delay: 80ms">
+              <h3>결과에 포함될 내용</h3>
+              <ul class="teaser-list">
+                <li>현재 상태 요약</li>
+                <li>우선 해결 과제</li>
+                <li>추천 교육 방향</li>
+                <li>추천 AX 실행 단계</li>
+                <li>적합한 서비스</li>
+              </ul>
+            </div>
+          </div>
+          <a class="btn btn--primary" href="diagnosis.html">무료 진단 시작하기</a>
+        </div>
+      </section>
+
+      <!-- ============ H5 Process ============ -->
+      <section class="section section--parchment" id="process" aria-labelledby="processTitle">
+        <div class="container">
+          <div class="section-head" data-reveal>
+            <p class="eyebrow">HOW IT WORKS</p>
+            <h2 class="section-title section-title--md" id="processTitle">진단에서 실행까지 이렇게 진행합니다.</h2>
+          </div>
+          <ol class="process-grid">
+            <li class="process-step" data-reveal>
+              <p class="problem-num">01</p>
+              <h3>현황 파악</h3>
+              <p>조직의 업무 방식과 AI 활용 수준을 간단한 질문으로 정리합니다.</p>
+            </li>
+            <li class="process-step" data-reveal style="--reveal-delay: 60ms">
+              <p class="problem-num">02</p>
+              <h3>AI·AX 진단</h3>
+              <p>2~3분의 적응형 진단으로 현재 상태와 우선 과제를 확인합니다.</p>
+            </li>
+            <li class="process-step" data-reveal style="--reveal-delay: 120ms">
+              <p class="problem-num">03</p>
+              <h3>방향 제안</h3>
+              <p>교육, 업무 진단, 자동화 중 지금 적합한 시작 경로를 제안합니다.</p>
+            </li>
+            <li class="process-step" data-reveal style="--reveal-delay: 180ms">
+              <p class="problem-num">04</p>
+              <h3>교육·컨설팅</h3>
+              <p>맞춤형 AI 교육과 업무 진단·AX 로드맵 컨설팅을 진행합니다.</p>
+            </li>
+            <li class="process-step" data-reveal style="--reveal-delay: 240ms">
+              <p class="problem-num">05</p>
+              <h3>실행·검증</h3>
+              <p>작은 자동화 실험과 도구로 실제 업무 변화를 확인하고 확장합니다.</p>
+            </li>
+          </ol>
+          <p class="fine-print process-note">※ 실제 화면에서는 스크롤에 따라 각 단계가 순차적으로 등장하는 모션을 검토 중입니다.</p>
+        </div>
+      </section>
+
+      <!-- ============ H6 Quick Consultation ============ -->
+      <section class="section" id="consultation" aria-labelledby="consultTitle">
+        <div class="container">
+          <div class="consult-layout">
+            <div class="consult-intro" data-reveal>
+              <p class="eyebrow">QUICK CONSULTATION</p>
+              <h2 class="section-title" id="consultTitle">빠르게 상담이 필요하신가요?</h2>
+              <p class="body-muted">현재 고민을 간단히 남겨주시면, 필요한 AI 교육·자동화·AX 방향을 함께 정리해드립니다.</p>
+              <p class="fine-print">무엇이 필요한지 아직 명확하지 않다면 <a href="diagnosis.html">AI·AX 맞춤 진단</a>을 먼저 이용할 수 있습니다.</p>
+            </div>
+            <form class="consult-form" id="quickConsultForm" novalidate data-reveal style="--reveal-delay: 80ms">
+              <div class="field">
+                <label class="field-label" for="qcOrg">회사/기관 유형</label>
+                <select id="qcOrg" name="orgType" required>
+                  <option value="" selected>기업 / 공공기관 / 학교·교육기관 / 개인·기타</option>
+                  <option value="기업">기업</option>
+                  <option value="공공기관">공공기관</option>
+                  <option value="학교·교육기관">학교·교육기관</option>
+                  <option value="개인·기타">개인·기타</option>
+                </select>
+                <p class="field-error" aria-live="polite"></p>
+              </div>
+              <div class="field">
+                <label class="field-label" for="qcInterest">관심 분야</label>
+                <select id="qcInterest" name="interest" required>
+                  <option value="" selected>AI 교육 / AX 로드맵 / 업무 자동화 / AI 도구·MVP</option>
+                  <option value="AI 교육">AI 교육</option>
+                  <option value="AX 로드맵">AX 로드맵</option>
+                  <option value="업무 자동화">업무 자동화</option>
+                  <option value="AI 도구·MVP">AI 도구·MVP</option>
+                </select>
+                <p class="field-error" aria-live="polite"></p>
+              </div>
+              <div class="field">
+                <label class="field-label" for="qcConcern">현재 고민</label>
+                <textarea id="qcConcern" name="concern" maxlength="500" placeholder="예: 반복 업무 자동화를 어디서 시작해야 할지 궁금해요." required></textarea>
+                <p class="field-error" aria-live="polite"></p>
+              </div>
+              <div class="field">
+                <label class="field-label" for="qcEmail">이메일 *</label>
+                <input id="qcEmail" name="email" type="email" placeholder="example@email.com" autocomplete="email" required />
+                <p class="field-error" aria-live="polite"></p>
+              </div>
+              <div class="field">
+                <label class="field-label" for="qcName">이름 (선택)</label>
+                <input id="qcName" name="name" type="text" placeholder="이름을 입력해주세요" autocomplete="name" />
+                <p class="field-error" aria-live="polite"></p>
+              </div>
+              <label class="consent-row">
+                <input type="checkbox" id="qcConsent" required />
+                <span>개인정보 수집 및 이용 동의 <span class="legal-pending">[법적 문구 검토 필요]</span></span>
+              </label>
+              <button class="btn btn--primary" id="qcSubmit" type="submit" disabled>빠른 상담 요청하기</button>
+              <p class="form-status" id="qcStatus" aria-live="polite"></p>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ H7 Trust / Cases ============ -->
+      <section class="section section--parchment" id="trust" aria-labelledby="trustTitle">
+        <div class="container">
+          <div class="section-head" data-reveal>
+            <p class="eyebrow">TRUST / CASES</p>
+            <h2 class="section-title" id="trustTitle">신뢰를 보여줄 영역 — 실제 근거가 준비되면 채웁니다.</h2>
+          </div>
+          <div class="trust-grid">
+            <article class="trust-card" data-reveal>
+              <h3>교육·프로젝트 경험</h3>
+              <p>[실제 근거/콘텐츠 입력 예정]<br />가짜 숫자·고객사는 사용하지 않음</p>
+              <span class="trust-state">근거 확인 대기</span>
+            </article>
+            <article class="trust-card" data-reveal style="--reveal-delay: 80ms">
+              <h3>고객 사례 / 후기</h3>
+              <p>[실제 근거/콘텐츠 입력 예정]<br />가짜 숫자·고객사는 사용하지 않음</p>
+              <span class="trust-state">근거 확인 대기</span>
+            </article>
+            <article class="trust-card" data-reveal style="--reveal-delay: 160ms">
+              <h3>파트너·협업 / 실적</h3>
+              <p>[실제 근거/콘텐츠 입력 예정]<br />가짜 숫자·고객사는 사용하지 않음</p>
+              <span class="trust-state">근거 확인 대기</span>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ H8 FAQ ============ -->
+      <section class="section" id="faq" aria-labelledby="faqTitle">
+        <div class="container">
+          <div class="section-head" data-reveal>
+            <p class="eyebrow">FAQ</p>
+            <h2 class="section-title section-title--md" id="faqTitle">자주 묻는 질문</h2>
+          </div>
+          <div class="faq-list">
+            <details class="faq-item">
+              <summary>우리 조직에 맞게 교육 내용을 바꿀 수 있나요?<svg class="faq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></summary>
+              <p class="faq-answer">네. 맞춤형 AI 교육은 직무, 조직 규모, 교육 목적을 기준으로 커리큘럼을 설계합니다. 사전 진단 결과를 바탕으로 실습 주제와 난도를 조정합니다.</p>
+            </details>
+            <details class="faq-item">
+              <summary>교육과 AX 컨설팅은 어떻게 연결되나요?<svg class="faq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></summary>
+              <p class="faq-answer">교육에서 배운 내용을 실제 업무에 적용할 수 있도록, 업무 진단과 AX 로드맵이 함께 이어집니다. 배우고 → 진단하고 → 자동화하고 → AX로 확장하는 흐름입니다.</p>
+            </details>
+            <details class="faq-item">
+              <summary>진단만 받아보고 상담하지 않아도 되나요?<svg class="faq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></summary>
+              <p class="faq-answer">네. AI·AX 진단 결과는 이메일 입력 없이 화면에서 바로 확인할 수 있고, 상담 신청은 별도의 선택 단계입니다.</p>
+            </details>
+            <details class="faq-item">
+              <summary>AI 도구나 MVP 제작까지 의뢰할 수 있나요?<svg class="faq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></summary>
+              <p class="faq-answer">가능합니다. 교육이나 컨설팅 과정에서 발견한 문제를 작은 도구나 MVP 형태로 검증하는 확장 서비스를 제공합니다.</p>
+            </details>
+            <details class="faq-item">
+              <summary>비용과 일정은 어떻게 정해지나요?<svg class="faq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></summary>
+              <p class="faq-answer">교육 범위, 인원, 컨설팅 깊이에 따라 달라집니다. 진단 결과나 상담 문의를 남겨주시면 범위를 함께 정리한 뒤 안내드립니다.</p>
+            </details>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ H9 Final CTA (dark) ============ -->
+      <section class="final-cta" aria-labelledby="finalCtaTitle">
+        <div class="container">
+          <h2 class="section-title" id="finalCtaTitle">우리 조직의 AI·AX 다음 단계를 확인해보세요.</h2>
+          <p>진단으로 방향을 먼저 확인하거나, 바로 맞춤 상담을 문의할 수 있습니다.</p>
+          <div class="hero-cta-row">
+            <a class="btn btn--primary" href="diagnosis.html">AI·AX 진단 시작하기</a>
+            <a class="btn btn--secondary-on-dark" href="contact.html">맞춤 상담 문의</a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- ============ H10 Footer ============ -->
+    <footer class="site-footer">
+      <div class="container">
+        <a class="brand" href="index.html">AX Ground</a>
+        <nav class="footer-nav" aria-label="푸터 메뉴">
+          <a href="#services">서비스</a>
+          <a href="diagnosis.html">AI·AX 진단</a>
+          <a href="#faq">FAQ</a>
+          <a href="contact.html">문의</a>
+        </nav>
+        <p class="footer-contact">문의 이메일 / 개인정보 관련 링크 자리</p>
+      </div>
+    </footer>
+
+    <script src="js/theme.js" defer></script>
+    <script src="js/app.js" defer></script>
+    <script src="js/workflow.js" defer></script>
+    <script src="js/slides.js" defer></script>
+  </body>
+</html>

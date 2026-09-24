@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="ko" data-theme="light">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#ffffff" />
+    <meta
+      name="description"
+      content="AX Ground 맞춤 상담 문의 — 교육, AX 로드맵, AI 도구·MVP 제작에 대해 필요한 내용을 남겨주세요."
+    />
+    <title>맞춤 상담 문의 — AX Ground</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230066CC'/%3E%3Ctext x='16' y='21' font-family='Arial,sans-serif' font-size='13' font-weight='700' fill='white' text-anchor='middle'%3EAX%3C/text%3E%3C/svg%3E"
+    />
+    <script>
+      (function () {
+        var saved = null;
+        try { saved = window.localStorage.getItem("axg-theme"); } catch (e) {}
+        var theme =
+          saved ||
+          (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+        document.documentElement.dataset.theme = theme;
+      })();
+    </script>
+    <link rel="stylesheet" href="css/style.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"
+    />
+  </head>
+  <body class="subpage">
+    <a class="skip-link" href="#main">본문으로 건너뛰기</a>
+
+    <div class="container">
+      <div class="subpage-top">
+        <a class="brand" href="index.html">AX Ground</a>
+        <div class="header-right">
+          <button
+            class="icon-btn theme-toggle"
+            type="button"
+            aria-label="다크 모드로 전환"
+            aria-pressed="false"
+            title="테마 전환"
+          >
+            <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.4M12 19.1v2.4M2.5 12h2.4M19.1 12h2.4M5.3 5.3l1.7 1.7M17 17l1.7 1.7M18.7 5.3 17 7M7 17l-1.7 1.7"/></svg>
+            <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.4 14.2A8.5 8.5 0 0 1 9.8 3.6a8.5 8.5 0 1 0 10.6 10.6Z"/></svg>
+          </button>
+          <a class="subpage-exit" href="index.html">홈으로</a>
+        </div>
+      </div>
+    </div>
+
+    <main id="main" class="subpage-main">
+      <div class="container">
+        <h1 class="subpage-title">맞춤 상담 문의</h1>
+        <p class="subpage-desc">교육, AX 로드맵, AI 도구·MVP 제작에 대해 필요한 내용을 남겨주세요.</p>
+
+        <div class="contact-layout">
+          <form class="contact-form" id="contactForm" novalidate>
+            <div class="field">
+              <label class="field-label" for="ctOrg">회사/기관명</label>
+              <input id="ctOrg" name="org" type="text" placeholder="입력" autocomplete="organization" />
+              <p class="field-error" aria-live="polite"></p>
+            </div>
+            <div class="field">
+              <label class="field-label" for="ctEmail">담당자 이메일 *</label>
+              <input id="ctEmail" name="email" type="email" placeholder="example@email.com" autocomplete="email" required />
+              <p class="field-error" aria-live="polite"></p>
+            </div>
+            <div class="field">
+              <label class="field-label" for="ctInterest">관심 서비스</label>
+              <select id="ctInterest" name="interest">
+                <option value="" selected>맞춤형 AI 교육 / AX 로드맵 / AI 도구·MVP</option>
+                <option value="맞춤형 AI 교육">맞춤형 AI 교육</option>
+                <option value="AX 로드맵">AX 로드맵</option>
+                <option value="업무 자동화">업무 자동화</option>
+                <option value="AI 도구·MVP">AI 도구·MVP</option>
+              </select>
+              <p class="field-error" aria-live="polite"></p>
+            </div>
+            <div class="field">
+              <label class="field-label" for="ctMessage">문의 내용</label>
+              <textarea id="ctMessage" name="message" maxlength="500" placeholder="필요한 상황과 요청사항을 적어주세요." style="min-height:150px"></textarea>
+              <p class="field-error" aria-live="polite"></p>
+            </div>
+            <label class="consent-row">
+              <input type="checkbox" id="ctConsent" required />
+              <span>개인정보 관련 필수 동의 <span class="legal-pending">[문구 검토 필요]</span></span>
+            </label>
+            <button class="btn btn--primary" id="ctSubmit" type="submit" disabled>상담 문의 보내기</button>
+            <p class="form-status" id="ctStatus" aria-live="polite"></p>
+          </form>
+
+          <aside class="contact-side" aria-label="상담 안내">
+            <h2>진단 후 문의한 경우</h2>
+            <div class="diag-context" id="diagContext" hidden>
+              <p><strong>진단 결과에서 이동했습니다.</strong></p>
+              <p>AI·AX 진단 결과를 상담 맥락과 함께 전달하는 영역입니다.</p>
+              <ul>
+                <li>• 진단 결과 요약</li>
+                <li>• 관심 서비스</li>
+                <li>• 상담에서 논의할 항목</li>
+              </ul>
+            </div>
+            <p id="diagContextFallback">AI·AX 진단 결과를 상담 맥락과 함께 전달하는 영역입니다. 진단을 완료한 뒤 이 페이지로 오면 결과 요약이 함께 표시됩니다.</p>
+            <p class="side-note">일반 문의는 이메일 중심으로 운영됩니다.</p>
+          </aside>
+        </div>
+      </div>
+    </main>
+
+    <script src="js/theme.js" defer></script>
+    <script>
+      /* 맞춤 상담 폼 — 클라이언트 검증만. 실제 전송은 /api/requests 연동 전까지 하지 않는다. */
+      (() => {
+        const form = document.getElementById("contactForm");
+        const email = document.getElementById("ctEmail");
+        const consent = document.getElementById("ctConsent");
+        const submit = document.getElementById("ctSubmit");
+        const status = document.getElementById("ctStatus");
+
+        // 진단 결과에서 이동한 경우 사이드 패널에 맥락 표시
+        if (new URLSearchParams(location.search).get("from") === "diagnosis") {
+          document.getElementById("diagContext").hidden = false;
+          document.getElementById("diagContextFallback").hidden = true;
+        }
+
+        const emailOk = () => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value.trim());
+        const update = () => { submit.disabled = !(consent.checked && emailOk()); };
+
+        email.addEventListener("input", () => {
+          const field = email.closest(".field");
+          const err = field.querySelector(".field-error");
+          err.textContent = email.value && !emailOk() ? "이메일 형식을 확인해 주세요." : "";
+          field.classList.toggle("has-error", Boolean(err.textContent));
+          update();
+        });
+        consent.addEventListener("change", update);
+        update();
+
+        form.addEventListener("submit", (e) => {
+          e.preventDefault();
+          if (!emailOk()) {
+            const field = email.closest(".field");
+            field.classList.add("has-error");
+            field.querySelector(".field-error").textContent = "유효한 이메일을 입력해 주세요.";
+            email.focus();
+            return;
+          }
+          if (!consent.checked) return;
+          submit.disabled = true;
+          status.textContent =
+            "입력을 확인했습니다. 현재 문의 접수 백엔드 연동 전이라 실제로 전송·저장되지 않습니다. (POST /api/requests 연동 예정)";
+          status.className = "form-status is-ok";
+        });
+      })();
+    </script>
+  </body>
+</html>
