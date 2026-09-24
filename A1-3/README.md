@@ -20,7 +20,7 @@ AI 교육부터 자동화, AX 전환까지. 조직과 개인의 업무·학습 �
 
 - 프론트엔드: 순수 HTML, CSS, Vanilla JavaScript
 - 백엔드: `api/`의 Python Vercel Serverless Function
-- AI API: OpenAI 호환 게이트웨이 `https://copa.codyssey.kr/v1/chat/completions`, 모델 `gpt-5.5`
+- AI API: 교육기관 OpenAI 호환 게이트웨이, 모델 `gpt-5.5`
 - Python 외부 패키지: 없음. `requirements.txt` 참고
 - 배포: GitHub + Vercel
 
@@ -62,7 +62,6 @@ node evidence/serve.mjs 4317
 | 변수 | 용도 | 기본값 |
 | --- | --- | --- |
 | `AI_API_KEY` | AI 게이트웨이 인증 키 | 없음, 필수 |
-| `AI_API_BASE` | Chat Completions 엔드포인트 | `https://copa.codyssey.kr/v1/chat/completions` |
 | `AI_MODEL` | 사용할 모델 | `gpt-5.5` |
 | `AI_TIMEOUT` | AI 요청 시간 제한(초) | `20` |
 
