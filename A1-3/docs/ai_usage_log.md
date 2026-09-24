@@ -28,6 +28,16 @@ A1-3 미션의 증빙 자료 중 “AI 코딩 도구 사용 과정(대화 로그
 
 | 2026-09-24 | GitHub `hongbinwee/codyssey-A1` 푸시에 앞서 A1-3 제출 패키지 문서 정리 요청(커밋·푸시·Vercel 설정은 금지) | README를 제품 README로 재작성(로컬 mock 실행·환경 변수·배포 URL 자리·미연동 범위), `docs/service_plan.md`를 실제 구현(8문항, 실패 처리 구현, copa 게이트웨이·gpt-5.5, 익명 미저장, 후속 패널)으로 갱신, `.gitignore` 추가(.env 계열·.vercel·__pycache__·.agents·.superpowers·실험본 폴더·루트 handoff.md), 스크린샷 개인정보 포함 여부 확인(테스트 입력만), mock 결과 캡처를 실제 AI 증빙으로 표시하지 않음을 명시 | 사용자가 원격 main이 로컬보다 A1-2 커밋 5개 앞선 상태임을 알리고 동기화·커밋·푸시를 금지함. ARCHITECTURE·PRD는 공개 제출 패키지에서 제외 후보로 분류. 실제 gpt-5.5 응답 캡처와 AI 코딩 도구 대화 로그는 별도 증빙 필요로 보고 | `README.md`, `docs/service_plan.md`, `.gitignore`, `submission_checklist.md`, `docs/ai_usage_log.md`, `docs/learning_log.md`, 대화 기록 |
 | 2026-09-24 | 수정된 `gpt-5.5` 어댑터를 가상 답변으로 1회 호출하고 제출용 증빙 상태 확인 | mock 백엔드 테스트 12/12와 HTTP 통합 테스트 10/10 통과. 실제 게이트웨이 호출은 DNS 조회 후에도 이 로컬 환경에서 TCP 443 연결에 실패해 응답을 확인하지 못함. 증빙 안내를 갱신해 진단 결과 화면을 mock으로 명확히 표시하고, 실제 AI 응답 및 대화 화면 캡처를 남은 항목으로 기록 | 테스트 입력에는 가상 팀 정보만 사용. 키 값은 소스·문서·스크린샷에 기록하지 않음. 실호출 미확인을 성공으로 표현하지 않고 Vercel 환경 변수 설정 후 재검증 필요로 구분 | `evidence/README.md`, `evidence/test_backend.py`, `evidence/test_api_http.py`, `evidence/desktop-1440-diagnosis-result.png`, 대화 기록 |
+
+## 최신 상태 보완 (2026-09-24)
+
+- 사용자가 README에 배포 전 문구가 남아 있음을 지적해 미션 제출 문서의 배포·검증 상태를 다시 확인했다.
+- GitHub 기준 저장소 `hongbinwee/codyssey-A1`의 `main`에는 A1-3 패키지가 이미 포함되어 있음을 확인했다. 이번 문서 변경은 로컬 검토 후 A1-3 범위만 선별해 반영한다.
+- 배포 사이트 주소를 README와 증빙 안내에 기록하되, 배포 환경에서 실제 AI 요청이 성공했는지는 확인 전 상태로 남긴다. Vercel 환경 변수 설정 여부와 실제 응답 성공을 같은 것으로 취급하지 않는다.
+- 공유된 와이어프레임 이미지는 참고 예시로 분류하며 미션 필수 산출물로 보지 않는다.
+- 갱신한 파일: `README.md`, `docs/service_plan.md`, `docs/learning_log.md`, `evidence/README.md`, `mission_analysis.md`, `submission_checklist.md`.
+- 이 문서의 요약은 미션이 요구하는 대화 로그 또는 스크린샷 세트를 대신하지 않으므로 실제 AI 도구 사용 증빙을 별도로 준비해야 한다.
+
 ## 기록해야 할 장면
 
 - [ ] 미션 원문을 분석하는 장면
